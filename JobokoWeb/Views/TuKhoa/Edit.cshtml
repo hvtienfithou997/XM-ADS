@@ -1,0 +1,201 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.TuKhoa
+
+@{
+    ViewData["Title"] = "Sửa";
+    string id = "";
+    if (ViewData["id"] != null)
+    {
+        id = Convert.ToString(ViewData["id"]);
+    }
+}
+
+<h4>Sửa từ khóa</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="id_chien_dich" class="control-label"></label>
+                <select asp-for="id_chien_dich" disabled="disabled" onchange="getQuangCao()" class="form-control"></select>
+                <span asp-validation-for="id_chien_dich" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="id_quang_cao" class="control-label"></label>
+                <select asp-for="id_quang_cao" disabled="disabled" class="form-control"></select>
+                <span asp-validation-for="id_quang_cao" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="tu_khoa" class="control-label"></label>
+                <input asp-for="tu_khoa" class="form-control" />
+                <span asp-validation-for="tu_khoa" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="kieu_doi_sanh" class="control-label"></label>
+                <select asp-for="kieu_doi_sanh" class="form-control" asp-items="@Html.GetEnumSelectList<KieuDoiSanh>()"></select>
+                <span asp-validation-for="kieu_doi_sanh" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="trang_thai" class="control-label"></label>
+                <select asp-for="trang_thai" class="form-control" asp-items="@Html.GetEnumSelectList<TrangThaiTuKhoa>()"></select>
+                <span asp-validation-for="trang_thai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="url_cuoi" class="control-label"></label>
+                <input asp-for="url_cuoi" class="form-control" />
+                <span asp-validation-for="url_cuoi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Lưu" id="btn_save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a id="back" asp-action="Index">Quay lại</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+
+        let id_chien_dich = '@ViewData["id_chien_dich"]';
+        let id_quang_cao = '@ViewData["id_quang_cao"]';
+    if (id_chien_dich !== "") {
+        $.get(`${API_URL}/chiendich/get/${id_chien_dich}`,
+            function (res) {
+                if (res.success) {
+                    let chien_dich = res.data;
+                    $(".ten_chien_dich a").html(`<b>Chiến dịch: ${chien_dich.ten}</b>`);
+                    $("#tk").attr("href", `/tukhoa?id_chien_dich=${id_chien_dich}`);
+                    $("#back").attr("href", `/tukhoa?id_chien_dich=${id_chien_dich}`);
+                    $("#qc").attr("href", `/quangcao?id_chien_dich=${id_chien_dich}`);
+                }
+            });
+    } else if (id_quang_cao !== "") {
+        $.get(`${API_URL}/quangcao/get/${id_quang_cao}`,
+            function(res) {
+                if (res.success) {
+                    $("#back").attr("href", `/tukhoa?id_quang_cao=${id_quang_cao}`);
+                    $("#tk").attr("href", `/tukhoa?id_quang_cao=${id_quang_cao}`);
+                    $("#qc").attr("href", `/quangcao?id_chien_dich=${res.data.id_chien_dich}`);
+
+                    $.get(`${API_URL}/chiendich/get/${res.data.id_chien_dich}`,
+                        function (res) {
+                            if (res.success) {
+                                let chien_dich = res.data;
+                                $(".ten_chien_dich a").html(`<b>Chiến dịch: ${chien_dich.ten}</b>`);
+                            }
+                        });
+
+
+                }
+            });
+    }
+
+        function getQuangCao() {
+            let id = $("#id_chien_dich").val();
+            $.get(`${API_URL}/quangcao/getbychiendich?id=${id}`,
+                function (res) {
+                    if (res.success) {
+                        let html_option = "";
+                        for (var i = 0; i < res.data.length; i++) {
+                            html_option += `<option value='${res.data[i].id}'>${res.data[i].ten_hien_thi}</option>`;
+                        }
+                        $("#id_quang_cao").html(html_option);
+                    }
+                });
+        }
+
+        $.get(`${API_URL}/tukhoa/get/@id`, function (res) {
+
+            if (res.success) {
+                let tu_khoa = res.data;
+                $("#tu_khoa").val(tu_khoa.tu_khoa);
+                $("#url_cuoi").val(tu_khoa.url_cuoi);
+                $("#kieu_doi_sanh").val(tu_khoa.kieu_doi_sanh);
+
+                setTimeout(function () {
+                    $("#id_chien_dich").val(tu_khoa.id_chien_dich);
+                    $("#id_quang_cao").val(tu_khoa.id_quang_cao);
+                }, 200);
+            }
+        });
+
+
+        $.get(`${API_URL}/chiendich/getall?fields=id,ten`, function (res) {
+
+            if (res.success) {
+                let html_option = "";
+                for (var i = 0; i < res.data.length; i++) {
+                    html_option += `<option value='${res.data[i].id}'>${res.data[i].ten}</option>`;
+                }
+                $("#id_chien_dich").html(html_option);
+            }
+        });
+
+   
+
+        $.get(`${API_URL}/quangcao/getall?fields=id,ten_hien_thi`, function (res) {
+            if (res.success) {
+                let html_option = "";
+                for (var i = 0; i < res.data.length; i++) {
+                    html_option += `<option value='${res.data[i].id}'>${res.data[i].ten_hien_thi}</option>`;
+                }
+                $("#id_quang_cao").html(html_option);
+            }
+        });
+
+        $("#btn_save").click(function (e) {
+            e.preventDefault();
+            let obj = {
+                "tu_khoa": $("#tu_khoa").val(),
+                //"id_chien_dich": $("#id_chien_dich > option:selected").val(),
+                "trang_thai": $("#trang_thai > option:selected").val(),
+                //"id_quang_cao": $("#id_quang_cao > option:selected").val(),
+                "url_cuoi": $("#url_cuoi").val(),
+                "kieu_doi_sanh": $("#kieu_doi_sanh > option:selected").val()
+            };
+            $.ajax({
+                type: "PUT",
+                contentType: 'application/json',
+                dataType: "json",
+                url: `${API_URL}/tukhoa/update/@id`,
+                data: JSON.stringify(obj),
+                success: function (res) {
+                    $("#div_loader").remove();
+                    if (res.success) {
+                        $.notify({
+                            title: "<strong>THÀNH CÔNG:</strong> ",
+                            message: "Sửa từ khóa thành công"
+                        });
+                    } else {
+                        $.notify({
+                            title: "<strong>LỖI:</strong> ",
+                            message: res.msg
+                        }, {
+                            type: 'danger'
+                        });
+                    }
+                },
+                failure: function (response) {
+                    $("#div_loader").remove();
+                    console.log(`Lỗi xảy ra ${response.error}`, "error");
+                },
+                error: function (request, textStatus, errorThrown) {
+                    $("#div_loader").remove();
+                    if (request.status == 401) {
+                        let token_exp = request.getResponseHeader('token-expired');
+                        if (token_exp != null && token_exp == 'true') {
+                            document.location.href = "/";
+                        }
+                        console.log(request.statusText);
+                    }
+                }
+            });
+        });
+</script>
+}

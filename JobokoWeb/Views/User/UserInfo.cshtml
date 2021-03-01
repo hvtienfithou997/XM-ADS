@@ -1,0 +1,162 @@
+﻿<div class="container">
+
+
+<ul class="nav nav-tabs row" id="myTab" role="tablist">
+    <li class="nav-item col-md-6">
+        <a class="tab-change nav-link active" id="changepass-tab" data-toggle="tab" href="#changepass" role="tab" aria-controls="profile" aria-selected="false">Đổi mật khẩu</a>
+    </li>
+    <li class="nav-item col-md-6">
+        <a class="nav-link tab-edit " id="edit-tab" data-toggle="tab" href="#edit-user" role="tab" aria-controls="home" aria-selected="true">Sửa thông tin</a>
+    </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="changepass" role="tabpanel" aria-labelledby="changepass-tab">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Nhập mật khẩu cũ</label>
+                    <input class="form-control" type="password" name="pass_cu" value="" />
+                    <input class="d-none form-control" id="password" />
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu mới</label>
+                    <input class="form-control" type="password" name="pass_moi_1" value="" />
+                </div>
+                <div class="form-group">
+                    <label>Nhập lại mật khẩu mới</label>
+                    <input class="form-control" type="password" name="pass_moi_2" value="" />
+                    <p class="text-danger valid-value"></p>
+                </div>
+                <div class="form-group" style="width: 30%">
+                    <input type="button" onclick="changePass()" class="btn btn-primary" value="Đổi mật khẩu" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane" id="edit-user" role="tabpanel" aria-labelledby="edit-tab">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label">Tên người dùng</label>
+                    <input class="form-control" name="ten_day_du" />
+                </div>
+                <div class="form-group">
+                    <input type="button" value="Cập nhật" class="btn btn-primary" onclick="changeInfo()" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="control-label">Ngân sách của bạn</label>
+                <input type="text" class="form-control" name="ngan_sach" value="" />
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+<script>
+    let id = '@ViewBag.id';
+
+    $.get(`${API_URL}/user/view/?id=${id}`, function (res) {
+        if (res.success) {
+            let user = res.data;
+            $("input[name='ten_day_du']").val(user.full_name);
+            $("input[name='ngan_sach']").val(formatCurency(user.ngan_sach));
+        }
+    });
+    
+
+    $.get(`${API_URL}/user/viewngansach`, function (res) {
+        if (res.success) {
+            let user = res.data;
+            $("input[name='ngan_sach']").val(formatCurency(user.ngan_sach));
+        }
+    });
+
+    function changePass() {
+        let pass_cu = $("input[name='pass_cu']").val();
+        let pass_moi_1 = $("input[name='pass_moi_1']").val();
+        let pass_moi_2 = $("input[name='pass_moi_2']").val();
+
+        var obj = { "id": id, "pass_cu": pass_cu, "pass_moi_1": pass_moi_1, "pass_moi_2": pass_moi_2 }
+        $.ajax({
+            type: "PUT",
+            contentType: 'application/json',
+            dataType: "json",
+            url: `${API_URL}/user/userpass/`,
+            data: JSON.stringify(obj),
+            success: function (res) {
+                if (res.success) {
+                    $.notify({
+                        title: "<strong>THÀNH CÔNG:</strong> ",
+                        message: "Sửa thành công"
+                    });
+                } else {
+                    $.notify({
+                        title: "<strong>LỖI:</strong> ",
+                        message: res.msg
+                    }, {
+                        type: 'danger'
+                    });
+                }
+            },
+            failure: function (response) {
+                $("#div_loader").remove();
+                console.log(`Lỗi xảy ra ${response.error}`, "error");
+            },
+            error: function (request, textStatus, errorThrown) {
+                $("#div_loader").remove();
+                if (request.status == 401) {
+                    let token_exp = request.getResponseHeader('token-expired');
+                    if (token_exp != null && token_exp == 'true') {
+                        document.location.href = "/";
+                    }
+                    console.log(request.statusText);
+                }
+            }
+        });
+    }
+
+
+    function changeInfo() {
+       let ten_day_du = $("input[name='ten_day_du']").val();
+
+        var obj = { "id": id, "ten_day_du": ten_day_du}
+
+        $.ajax({
+            type: "PUT",
+            contentType: 'application/json',
+            dataType: "json",
+            url: `${API_URL}/user/userinfo/`,
+            data: JSON.stringify(obj),
+            success: function (res) {
+                if (res.success) {
+                    $.notify({
+                        title: "<strong>THÀNH CÔNG:</strong> ",
+                        message: "Sửa thành công"
+                    });
+                } else {
+                    $.notify({
+                        title: "<strong>LỖI:</strong> ",
+                        message: res.msg
+                    }, {
+                        type: 'danger'
+                    });
+                }
+            },
+            failure: function (response) {
+                $("#div_loader").remove();
+                console.log(`Lỗi xảy ra ${response.error}`, "error");
+            },
+            error: function (request, textStatus, errorThrown) {
+                $("#div_loader").remove();
+                if (request.status == 401) {
+                    let token_exp = request.getResponseHeader('token-expired');
+                    if (token_exp != null && token_exp == 'true') {
+                        document.location.href = "/";
+                    }
+                    console.log(request.statusText);
+                }
+            }
+        });
+    }
+</script>

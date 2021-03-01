@@ -1,0 +1,31 @@
+﻿
+@{
+    ViewData["Title"] = "Detail";
+}
+
+<h1>Chi tiết User</h1>
+<hr />
+<p><a target="_blank" class="btn-size btn-warning text-light" href="/user/edit?id=@ViewBag.id">Sửa</a></p>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <details open>
+            <summary>Thông tin User bao gồm:</summary>
+            <ul id="user_detail">
+                
+                
+            </ul>
+        </details>
+    </div>
+</div>
+
+<div>
+    <a asp-action="all">Quay lại danh sách</a>
+</div>
+<script>
+    let id = "@ViewBag.id";
+    $(function () {
+        bindDetail(id);
+    })
+</script>
+<script asp-append-version="true" src="~/js/user.js"></script>

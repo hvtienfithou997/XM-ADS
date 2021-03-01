@@ -1,0 +1,208 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-md-1">
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Site ID</label>
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Tên từ khóa</label>
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Ngày bắt đầu</label>
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Ngày kết thúc</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-1">
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <select class="form-control" name="site_id" id="site_id">
+                <option value="">Chọn site id</option>
+                <option value="webjoboko">Web Joboko</option>
+                <option value="">...</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <input placeholder="Tìm kiếm từ khóa" name="tu_khoa" id="tu_khoa" value="" class="form-control" />
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <input name="ngay_bd" class="form-control datepicker" autocomplete="off" />
+        <input type="hidden" id="ngay_bat_dau" value="0" name="ngay_bat_dau" class="form-control" />
+    </div>
+    <div class="col-md-2">
+
+        <input name="ngay_kt" class="form-control datepicker" autocomplete="off" />
+        <input type="hidden" id="ngay_ket_thuc" value="0" name="ngay_ket_thuc" class="form-control" />
+    </div>
+
+    <div class="col-md-1">
+        <button id="btn_search" onclick="getLog()" class="btn btn-primary">Tìm</button>
+    </div>
+</div>
+<div class="total_recs"></div>
+<table class="table" id="table_data">
+    <thead>
+        <tr>
+
+            <th>
+                Từ khóa
+            </th>
+            <th>
+                Lượt gọi trang
+            </th>
+            <th>
+                Tổng số Q/c <br />Có thể hiển thị
+            </th>
+            <th>
+                Ngày
+            </th>
+            <th>
+                Các trang hiển thị từ khóa này
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div style="text-align: center; width: 100%; display: inline-flex; justify-content: center">
+    <div class="d-flex text-center data-container">
+        <div class="paging">
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        let page = '@ViewBag.page';
+        $(document).ready(function() {
+            let n = "@(ViewBag.tu_khoa != null ? Html.UrlEncoder.Encode(ViewBag.tu_khoa) : string.Empty)";
+
+            @if (ViewBag.ngay_bat_dau != null)
+            {
+                <text>
+                    $('[name="ngay_bd"]').datepicker('update', '@ViewBag.ngay_bat_dau');
+                </text>
+            }
+            @if (ViewBag.ngay_ket_thuc != null)
+            {
+                <text>
+                    $('[name="ngay_kt"]').datepicker('update', '@ViewBag.ngay_ket_thuc');
+                </text>
+            }
+            searchLog(n);
+        });
+        $('#tu_khoa').bind('keypress',
+            function(e) {
+                if (e.keyCode === 13) {
+                    page = 1;
+                    getLog(page);
+                }
+            });
+        $('[name="ngay_bd"]').datepicker({
+            format: 'dd/mm/yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('hide',
+            function(e) {
+                if (e.dates.length > 0) {
+                    $("#ngay_bat_dau").val(e.date.getTime() / 1000);
+                } else {
+                    $("#ngay_bat_dau").val(0);
+                }
+            });
+        $('[name="ngay_kt"]').datepicker({
+            format: 'dd/mm/yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('hide',
+            function(e) {
+                if (e.dates.length > 0) {
+                    $("#ngay_ket_thuc").val(e.date.getTime() / 1000);
+                } else {
+                    $("#ngay_ket_thuc").val(0);
+                }
+            });
+
+        function searchLog(name) {
+
+            $("#tu_khoa").val(`"${decodeURIComponent(name)}"`);
+            page = 1;
+            getLog(page);
+        }
+
+        function getLog(page) {
+            let tu_khoa = $("#tu_khoa").val();
+            if (typeof tu_khoa == 'undefined')
+                tu_khoa = "";
+            let ngay_bat_dau = $('[name="ngay_bd"]').val();
+            let ngay_ket_thuc = $('[name="ngay_kt"]').val();
+            let site_id = $("#site_id").val();
+            $("#table_data tbody").children().remove();
+            $.ajax
+            ({
+                type: 'GET',
+                url: `${API_URL}/log/tukhoatimkiem`,
+                dataType: 'json',
+                data: {
+                    tu_khoa: tu_khoa,
+                    site_id: site_id,
+                    ngay_bat_dau: ngay_bat_dau,
+                    ngay_ket_thuc: ngay_ket_thuc,
+                    page: page,
+                    page_size: PAGE_SIZE
+                },
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", 'Bearer ' + API_TOKEN);
+                    const url = new URL(window.location);
+                    url.searchParams.set('tu_khoa', tu_khoa);
+                    url.searchParams.set('site_id', site_id);
+                    url.searchParams.set('ngay_bat_dau', ngay_bat_dau);
+                    url.searchParams.set('ngay_ket_thuc', ngay_ket_thuc);
+                    url.searchParams.set('page', page);
+                    window.history.pushState({
+                        "tu_khoa": tu_khoa,
+                        "site_id": site_id,
+                        'ngay_bat_dau': ngay_bat_dau,
+                        'ngay_ket_thuc': ngay_ket_thuc,
+                        'page': page
+                        },
+                        '',
+                        url);
+                },
+                success: function(res) {
+                    if (res.success) {
+                        $(".total_recs").html("Tổng: " + res.total);
+                        paging(res.total, 'getLog', page);
+                        let html = "";
+                        res.data.forEach(function(item) {
+                            html += "<tr>";
+                            html += `<td><span class='badge badge-info search_log' onclick="searchLog('${item.n}')">${
+                                item.n}</span></td>`;
+                            html += `<td>${item.ext.sm.c}</td>`;
+                            html += `<td>${item.sum.co.s}</td>`;
+                            html += `<td>${ticksToDateString(item.d)}</td>`;
+                            html += `<td><a href="/log/trangtukhoatimkiem?tu_khoa=${item.n}&ngay_bat_dau=${
+                                ticksToDateString(item.d)}&ngay_ket_thuc=${ticksToDateString(item.d)
+                                }">Các trang...</a></td>`;
+                            html += "</tr>";
+                        });
+                        $("#table_data tbody").html(html);
+                    }
+                },
+                error: function(ex) {
+                    alert("Message: " + ex);
+                }
+            });
+        }
+    </script>
+}

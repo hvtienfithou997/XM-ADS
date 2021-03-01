@@ -1,0 +1,13 @@
+F:\XmAds\JobokoAdsES\bin\Debug\netstandard2.0\JobokoAdsES.deps.json
+F:\XmAds\JobokoAdsES\bin\Debug\netstandard2.0\JobokoAdsES.dll
+F:\XmAds\JobokoAdsES\bin\Debug\netstandard2.0\JobokoAdsES.pdb
+F:\XmAds\JobokoAdsES\bin\Debug\netstandard2.0\JobokoAdsModels.dll
+F:\XmAds\JobokoAdsES\bin\Debug\netstandard2.0\XUtil.dll
+F:\XmAds\JobokoAdsES\bin\Debug\netstandard2.0\JobokoAdsModels.pdb
+F:\XmAds\JobokoAdsES\obj\Debug\netstandard2.0\JobokoAdsES.csprojAssemblyReference.cache
+F:\XmAds\JobokoAdsES\obj\Debug\netstandard2.0\JobokoAdsES.AssemblyInfoInputs.cache
+F:\XmAds\JobokoAdsES\obj\Debug\netstandard2.0\JobokoAdsES.AssemblyInfo.cs
+F:\XmAds\JobokoAdsES\obj\Debug\netstandard2.0\JobokoAdsES.csproj.CoreCompileInputs.cache
+F:\XmAds\JobokoAdsES\obj\Debug\netstandard2.0\JobokoAdsES.csproj.CopyComplete
+F:\XmAds\JobokoAdsES\obj\Debug\netstandard2.0\JobokoAdsES.dll
+F:\XmAds\JobokoAdsES\obj\Debug\netstandard2.0\JobokoAdsES.pdb

@@ -1,0 +1,299 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.ChienDich
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h4>Tạo chiến dịch</h4>
+
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ten" class="control-label"></label>
+                <input asp-for="ten" class="form-control" />
+                <span asp-validation-for="ten" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="trang_thai" class="control-label"></label>
+                <select asp-for="trang_thai" class="form-control" asp-items="Html.GetEnumSelectList<TrangThaiChienDich>()">
+                </select>
+                <span asp-validation-for="trang_thai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ngan_sach" class="control-label"></label>
+                <input id="ngan_sach" class="form-control" onkeyup="splitInDots(this)" onblur="splitInDots(this)" />
+                <span asp-validation-for="ngan_sach" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label asp-for="gia_thau" class="control-label"></label>
+                        <select id="ten_gia_thau" class="form-control">
+                            <option selected="selected" value="CLICK">Lượt nhấp</option>
+                            <option value="CONVERT">Lượt chuyển đổi</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="control-label">Giá tối đa</label>
+                        <input id="gia_toi_da" class="form-control" value="1.000" onkeyup="splitInDots(this)" onblur="splitInDots(this)" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label asp-for="ngay_bat_dau" class="control-label"></label>
+                        <input type="text" name="ngay_bd" class="form-control" autocomplete="off" />
+                        <input type="hidden" id="ngay_bat_dau" name="ngay_bat_dau" class="form-control" />
+                        <span asp-validation-for="ngay_bat_dau" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="control-label">Chọn quốc gia</label>
+                        <select class="form-control" id="country" onchange="chooseCountry()">
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label asp-for="ngay_ket_thuc" class="control-label"></label>
+                        <input name="ngay_kt" class="form-control" autocomplete="off" />
+                        <input type="hidden" id="ngay_ket_thuc" name="ngay_ket_thuc" class="form-control" />
+                        <span asp-validation-for="ngay_ket_thuc" class="text-danger"></span>
+
+                        <label asp-for="ip_loai_tru" class="control-label"></label><span class="text-danger"> (Mỗi IP một dòng.)</span>
+                        <textarea name="ip_loai_tru" class="form-control" autocomplete="off"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="dia_diem_muc_tieu" class="control-label"></label>
+                        <select class="form-control" multiple id="dia_diem_muc_tieu" onchange="choose_ddmt()">
+                        </select>
+                        <label asp-for="dia_diem_loai_tru" class="control-label"></label>
+                        <select class="form-control" multiple id="dia_diem_loai_tru" onchange="choose_ddlt()">
+                        </select>
+                        <hr />
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <label class="control-label">Địa điểm mục tiêu đã chọn</label>
+                                <select class="form-control" multiple id="ddmt"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="control-label">Địa điểm loại trừ đã chọn</label>
+                                <select class="form-control" multiple id="ddlt"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Lưu" id="btn_save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Quay lại</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+
+        $('[name="ngay_bd"]').datepicker({
+            language: 'vi',
+            format: 'dd-mm-yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('hide',
+            function (e) {
+                if (e.dates.length > 0) {
+                    $("#ngay_bat_dau").val(e.date.getTime() / 1000);
+                }
+            });
+        $('[name="ngay_kt"]').datepicker({
+            format: 'dd-mm-yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('hide',
+            function (e) {
+                if (e.dates.length > 0) {
+                    $("#ngay_ket_thuc").val(e.date.getTime() / 1000);
+                }
+            });
+        $("#btn_save").click(function (e) {
+            e.preventDefault();
+
+            let dia_diem_mt = [], dia_diem_lt = [];
+
+            $('#ddmt option:selected').each(function () {
+                dia_diem_mt.push($(this).val());
+            });
+            $('#ddlt option:selected').each(function () {
+                dia_diem_lt.push($(this).val());
+            });
+
+            let ip_loai_tru = $("textarea[name='ip_loai_tru']").val().split('\n');
+
+            let obj = {
+                "ten": $("#ten").val(),
+                "trang_thai": $("#trang_thai > option:selected").val(),
+                "ngan_sach": $("#ngan_sach").val().length === 0 ? 0 : replaceDot($("#ngan_sach").val()),
+                "ngay_bat_dau": $("#ngay_bat_dau").val().length === 0 ? 0 : $("#ngay_bat_dau").val(),
+                "ngay_ket_thuc": $("#ngay_ket_thuc").val().length === 0 ? 0 : $("#ngay_ket_thuc").val(),
+                "gia_thau": {
+                    "ten": $("#ten_gia_thau>option:selected").val(),
+                    "gia_toi_da": $("#gia_toi_da").val().length === 0 ? 0 : replaceDot($("#gia_toi_da").val())
+                },
+                "dia_diem_muc_tieu": dia_diem_mt,
+                "dia_diem_loai_tru": dia_diem_lt,
+                "ip_loai_tru": ip_loai_tru
+            };
+
+            $.ajax({
+                type: "POST",
+                contentType: 'application/json',
+                dataType: "json",
+                url: `${API_URL}/chiendich/add`,
+                data: JSON.stringify(obj),
+                success: function (res) {
+                    $("#div_loader").remove();
+                    if (res.success) {
+                        $.notify({
+                            title: "<strong>THÀNH CÔNG:</strong> ",
+                            message: "Thêm chiến dịch thành công"
+                        });
+                    } else {
+                        $.notify({
+                            title: "<strong>LỖI:</strong> ",
+                            message: res.msg
+                        },
+                            {
+                                type: 'danger'
+                            });
+                    }
+                },
+                failure: function (response) {
+                    $("#div_loader").remove();
+                    console.log(`Lỗi xảy ra ${response.error}`, "error");
+                },
+                error: function (request, textStatus, errorThrown) {
+                    $("#div_loader").remove();
+                    if (request.status == 401) {
+                        let token_exp = request.getResponseHeader('token-expired');
+                        if (token_exp != null && token_exp === 'true') {
+                            document.location.href = "/";
+                        }
+                        console.log(request.statusText);
+                    }
+                }
+            });
+        });
+
+        function chooseCountry() {
+            let country = $("#country").val();
+
+            $.get(`${API_URL}/chiendich/province`,
+                function (res) {
+                    if (res.success) {
+                        let html_dia_diem = "";
+                        res.data.forEach(function (item) {
+                            if (item.country === country) {
+                                item.provinces.forEach(function (dd) {
+                                    html_dia_diem += `<option value="${item.code}-${dd.name}">${item.code}-${dd.name
+                                        }</option>`;
+                                });
+                            }
+                        });
+
+                        $("#dia_diem_muc_tieu").html(html_dia_diem);
+                        $("#dia_diem_muc_tieu").select2();
+
+                        $("#dia_diem_loai_tru").html(html_dia_diem);
+                        $("#dia_diem_loai_tru").select2();
+
+                        //$("#ddmt").val(["Toàn quốc"]);
+                        //$("#ddmt").select2(["Toàn quốc"]);
+                    }
+                });
+
+            let dia_diem_da_chon = $("#ddmt").val();
+            $("#ddmt").val(dia_diem_da_chon);
+            $("#ddmt").select2(dia_diem_da_chon);
+
+            let dia_diem_loai_tru = $("#ddlt").val();
+            $("#ddlt").val(dia_diem_loai_tru);
+            $("#ddlt").select2(dia_diem_loai_tru);
+
+        }
+
+        let arr_dia_diem = [];
+
+        function choose_ddmt() {
+            let dia_diem_da_chon = $("#ddmt").val();
+
+            let dd = $("#dia_diem_muc_tieu").val();
+            var mer = dd.concat(dia_diem_da_chon);
+            arr_dia_diem = dd;
+            let html = "";
+            mer.forEach(function (item) {
+                html += `<option value=${item}>${item}</option>`;
+            });
+            $("#ddmt").val(mer);
+            $("#ddmt").select2(mer);
+
+        }
+
+        function choose_ddlt() {
+            let dia_diem_loai_tru = $("#ddlt").val();
+
+            let dd = $("#dia_diem_loai_tru").val();
+            var mer = dd.concat(dia_diem_loai_tru);
+            arr_dia_diem = dd;
+            let html = "";
+            mer.forEach(function (item) {
+                html += `<option value=${item}>${item}</option>`;
+            });
+            $("#ddlt").val(mer);
+            $("#ddlt").select2(mer);
+        }
+
+        $.get(`${API_URL}/chiendich/province`,
+            function (res) {
+                if (res.success) {
+                    let html = "";
+                    let html_dia_diem = "";
+                    res.data.forEach(function (item) {
+                        html += `<option value='${item.country}'>${item.country}</option>`;
+                        item.provinces.forEach(function (dd) {
+                            html_dia_diem += `<option value="${item.code}-${dd.name}">${item.code}-${dd.name}</option>`;
+                        });
+                    });
+
+                    $("#country").html(html);
+                    $("#country").select2();
+
+                    $("#dia_diem_muc_tieu").html(html_dia_diem);
+                    $("#dia_diem_muc_tieu").select2();
+
+                    $("#dia_diem_loai_tru").html(html_dia_diem);
+                    $("#dia_diem_loai_tru").select2();
+
+                    $("#ddmt").html(html_dia_diem);
+                    $("#ddmt").select2();
+
+                    $("#ddlt").html(html_dia_diem);
+                    $("#ddlt").select2();
+                }
+            });
+    </script>
+}

@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>b8969c0b-dd1d-46c5-9bc5-bf4fe086c966</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IdGen" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JobokoAdsES\JobokoAdsES.csproj" />
+    <ProjectReference Include="..\JobokoAdsModels\JobokoAdsModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="XUtil">
+      <HintPath>..\dll\XUtil.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+
+</Project>

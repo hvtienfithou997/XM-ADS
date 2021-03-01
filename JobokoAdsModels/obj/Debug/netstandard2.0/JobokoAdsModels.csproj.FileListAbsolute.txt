@@ -1,0 +1,9 @@
+F:\XmAds\JobokoAdsModels\bin\Debug\netstandard2.0\JobokoAdsModels.deps.json
+F:\XmAds\JobokoAdsModels\bin\Debug\netstandard2.0\JobokoAdsModels.dll
+F:\XmAds\JobokoAdsModels\bin\Debug\netstandard2.0\JobokoAdsModels.pdb
+F:\XmAds\JobokoAdsModels\obj\Debug\netstandard2.0\JobokoAdsModels.csprojAssemblyReference.cache
+F:\XmAds\JobokoAdsModels\obj\Debug\netstandard2.0\JobokoAdsModels.AssemblyInfoInputs.cache
+F:\XmAds\JobokoAdsModels\obj\Debug\netstandard2.0\JobokoAdsModels.AssemblyInfo.cs
+F:\XmAds\JobokoAdsModels\obj\Debug\netstandard2.0\JobokoAdsModels.csproj.CoreCompileInputs.cache
+F:\XmAds\JobokoAdsModels\obj\Debug\netstandard2.0\JobokoAdsModels.dll
+F:\XmAds\JobokoAdsModels\obj\Debug\netstandard2.0\JobokoAdsModels.pdb

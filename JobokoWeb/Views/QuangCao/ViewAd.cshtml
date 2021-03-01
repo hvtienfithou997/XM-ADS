@@ -1,0 +1,215 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.QuangCao
+@{
+    ViewData["Title"] = Model.tieu_de_1 + "|" + Model.tieu_de_2;
+}
+<li class="xqc">
+    <div class="job-descrip2">
+        <div class="titjob2">
+            <p class="subtitj"><i class="iconhot"></i><a href="@Model.link_dich" class="hotjob" target="_blank">@Model.tieu_de_1</a></p>
+        </div>
+        <p class="namecompany3">@Model.tieu_de_2</p>
+        <p class="infother2">
+            <span class="job-mg">@Model.mo_ta_1</span>
+        </p>
+        <p class="desjob">
+            @Model.mo_ta_2
+        </p>
+        <p class="adswatermark" data-value="2021-01-06T12:40:00"><em></em></p>
+    </div>
+    <div class="xqc-tip" data-toggle="tooltip" data-placement="bottom" title="Nhà tuyển dụng sử dụng dịch vụ tìm kiếm ứng viên tiềm năng của Joboko">QC</div>
+</li>
+<button id="btn_send">GUI BAO CAO</button>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script>
+    function addimg(t) {
+        var e = document.createElement("img");
+        e.src = t, e.width = "1px", e.height = "1px", document.body.appendChild(e)
+    }
+
+    function getdomain(t) {
+        var e;
+        return e = t.indexOf("://") > -1 ? t.split("/")[2] : t.split("/")[0], e = e.split(":")[0]
+    }
+
+    function getref() {
+        var t = document.referrer;
+        return getdomain(t) == getdomain(window.location.href) && (t = ""), t
+    }
+
+    function XReport(t, e) {
+        this.appid = t, this.objectlist = e, this.ref = getref(), this.send = function () {
+            var t = `https://rp.codon.vn/savefull.ashx`;
+            if (this.objectlist.length > 10) {
+                var xrequest = new XMLHttpRequest();
+                xrequest.open("POST", t, true);
+                xrequest.timeout = 7000;
+                xrequest.withCredentials = true;
+                xrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xrequest.send('appid=' + this.appid + '&ref=' + encodeURIComponent(this.ref) + '&objlist=' + encodeURIComponent(this.objectlist) + '&t=_' + new Date().getTime());
+            } else {
+                t += "?appid=" + this.appid + "&ref=" + encodeURI(this.ref) + "&objlist=" + encodeURI(this.objectlist), addimg(t)
+            }
+        }
+    }
+    String.prototype.replaceAll = function (search, replacement) {
+        var target = this;
+        return target.replace(new RegExp(search, 'g'), replacement);
+    };
+    $(function () {
+        let ai = `test`;
+        $("#btn_send").click(function (ev) {
+            ev.preventDefault();
+            var f = `[{"oi":"@ViewBag.id","an":"s","main":1,"sd":0,"cplx":0,"pl":[{"k":"adsid","v":"@ViewBag.id_tk","en":0,"cplx":0}],"plx":[{"k":"adsid","v":["@ViewBag.id_tk"],"en":0,"cplx":0}],"avl":[{"k":"display","v":1,"en":0,"cplx":0}]}]`;
+            var e = new XReport(ai, f);
+            e.send();
+
+
+        });
+    });
+</script>
+<style>
+    .xqc {
+        position: relative;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    .list-job5 li {
+        padding: 15px 0px;
+        width: 100%;
+        display: flex;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        border-bottom: solid 1px #ddd;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .list-job5 li {
+        width: 100%;
+    }
+
+        .list-job5 li .job-descrip2 {
+            width: 96%;
+            margin: 0 auto;
+        }
+
+    .titjob2 {
+        margin-bottom: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .subtitj {
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .iconhot:before {
+        content: "HOT";
+        font-weight: 400;
+        font-size: .6875rem;
+        line-height: 1.4;
+        padding: .1875rem .5625rem;
+        border-radius: 999px;
+        display: inline-block;
+        margin-right: .625rem;
+        top: -.0625rem;
+        position: relative;
+        color: #ffffff;
+        background-color: #e20c0c;
+        -webkit-backface-visibility: hidden;
+        -webkit-transition: all .3s ease;
+        -o-transition: all .3s ease;
+        transition: all .3s ease;
+        font-style: normal;
+    }
+
+    .subtitj a {
+        color: #1122cc;
+    }
+
+    .namecompany3 {
+        font-size: 13px;
+        color: #333;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+
+    .infother2 {
+        font-size: 13px;
+        color: #333;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .job-mg {
+        margin-right: 15px;
+    }
+
+        .job-mg i {
+            margin-right: 3px;
+        }
+
+    .fa-map-marker:before {
+        content: "\f041";
+    }
+
+    .job-mg em {
+        font-style: normal;
+    }
+
+    .job-mg {
+        margin-right: 15px;
+    }
+
+        .job-mg i {
+            margin-right: 3px;
+        }
+
+    .fa-dollar:before, .fa-usd:before {
+        content: "\f155";
+    }
+
+    .job-mg em {
+        font-style: normal;
+    }
+
+    .desjob {
+        font-size: 13px;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+        .desjob strong {
+            font-weight: normal;
+        }
+
+    .adswatermark {
+        color: #999;
+        font-size: 12px;
+    }
+
+    .xqc .xqc-tip {
+        border: solid 1px #ddd;
+        padding: 1px 3px;
+        font-size: 10px;
+        position: absolute;
+        border-radius: 3px;
+        display: inline-flex;
+        top: 10px;
+        right: 10px;
+    }
+</style>

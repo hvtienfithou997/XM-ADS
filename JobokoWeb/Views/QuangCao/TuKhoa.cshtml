@@ -1,0 +1,172 @@
+﻿@model List<JobokoAdsModels.TuKhoaDauGia>
+
+@{
+    ViewData["Title"] = "Quảng cáo theo từ khóa";
+}
+
+@if (Model.Count > 0)
+{
+    @foreach (var item in Model)
+    {
+        <li class="xqc">
+            <div class="job-descrip2">
+                <div class="titjob2">
+                    <p class="subtitj"><i class="iconhot"></i><a href="@item.link_dich" class="hotjob" target="_blank">@item.tieu_de_1</a></p>
+                </div>
+                <p class="namecompany3">@item.tieu_de_2</p>
+                <p class="infother2">
+                    <span class="job-mg">@item.mo_ta_1</span>
+                </p>
+                <p class="desjob">
+                    @item.mo_ta_2
+                </p>
+                <p class="adswatermark" data-value="2021-01-06T12:40:00"><em></em></p>
+            </div>
+            <div class="xqc-tip" data-toggle="tooltip" data-placement="bottom" title="Nhà tuyển dụng sử dụng dịch vụ tìm kiếm ứng viên tiềm năng của Joboko">QC</div>
+        </li>
+    }
+}
+<style>
+    .xqc {
+        position: relative;
+    }
+    li {
+        list-style: none;
+    }
+    .list-job5 li {
+        
+        padding: 15px 0px;
+        width: 100%;
+        display: flex;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        border-bottom: solid 1px #ddd;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .list-job5 li {
+        width: 100%;
+    }
+
+        .list-job5 li .job-descrip2 {
+            width: 96%;
+            margin: 0 auto;
+        }
+
+    .titjob2 {
+        margin-bottom: 5px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .subtitj {
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .iconhot:before {
+        content: "HOT";
+        font-weight: 400;
+        font-size: .6875rem;
+        line-height: 1.4;
+        padding: .1875rem .5625rem;
+        border-radius: 999px;
+        display: inline-block;
+        margin-right: .625rem;
+        top: -.0625rem;
+        position: relative;
+        color: #ffffff;
+        background-color: #e20c0c;
+        -webkit-backface-visibility: hidden;
+        -webkit-transition: all .3s ease;
+        -o-transition: all .3s ease;
+        transition: all .3s ease;
+        font-style: normal;
+    }
+
+    .subtitj a {
+        color: #1122cc;
+    }
+
+    .namecompany3 {
+        font-size: 13px;
+        color: #333;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+
+    .infother2 {
+        font-size: 13px;
+        color: #333;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .job-mg {
+        margin-right: 15px;
+    }
+
+        .job-mg i {
+            margin-right: 3px;
+        }
+
+    .fa-map-marker:before {
+        content: "\f041";
+    }
+
+    .job-mg em {
+        font-style: normal;
+    }
+
+    .job-mg {
+        margin-right: 15px;
+    }
+
+        .job-mg i {
+            margin-right: 3px;
+        }
+
+    .fa-dollar:before, .fa-usd:before {
+        content: "\f155";
+    }
+
+    .job-mg em {
+        font-style: normal;
+    }
+
+    .desjob {
+        font-size: 13px;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+        .desjob strong {
+            font-weight: normal;
+        }
+
+    .adswatermark {
+        color: #999;
+        font-size: 12px;
+    }
+
+    .xqc .xqc-tip {
+        border: solid 1px #ddd;
+        padding: 1px 3px;
+        font-size: 10px;
+        position: absolute;
+        border-radius: 3px;
+        display: inline-flex;
+        top: 10px;
+        right: 10px;
+    }
+</style>

@@ -1,0 +1,742 @@
+﻿@using JobokoAdsModels
+@model IEnumerable<JobokoAdsModels.TuKhoa>
+
+@{
+    ViewData["Title"] = "Từ khóa quảng cáo";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>Từ khóa quảng cáo</h3>
+    </div>
+    <div class="col-md-6 ten_quang_cao">
+        <h3></h3>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(ViewBag.id_quang_cao))
+{
+    <a href="@Url.Action("Create", new {id_quang_cao = ViewBag.id_quang_cao})">Tạo từ khóa</a>
+}
+else if (!string.IsNullOrEmpty(ViewBag.id_chien_dich))
+{
+    <a href="@Url.Action("Create", new {id_chien_dich = ViewBag.id_chien_dich})">Tạo từ khóa</a>
+}
+else
+{
+    <p>
+        <a asp-action="Create">Tạo từ khóa</a>
+    </p>
+}
+<div id="chart"></div>
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-3">
+        <input placeholder="Tìm kiếm từ khóa" name="term" value="" class="form-control" />
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-control" id="trang_thai" name="trang_thai" asp-items="Html.GetEnumSelectList<TrangThaiTuKhoa>()">
+            <option value="-1">---Trạng thái từ khóa---</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-control" id="field_sort" name="field_sort">
+            <option value="">Ngày sửa</option>
+            <option value="luot_hien_thi">Lượt hiển thị</option>
+            <option value="luot_click">Lượt click</option>
+            <option value="chi_phi">Chi phí</option>
+            <option value="ty_le_tuong_tac">Tỷ lệ tương tác</option>
+            <option value="cpc_trung_binh">CPC trung bình</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        <select class="form-control" id="sort_order" name="sort_order">
+            @*<option value="">Thứ tự</option>*@
+            <option value="1">Giảm</option>
+            <option value="0">Tăng</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        <button id="btn_search" class="btn btn-primary">Tìm</button>
+    </div>
+</div>
+<div class="total_recs"></div>
+<table class="table" id="table_data">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.tu_khoa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.kieu_doi_sanh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.trang_thai)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.id_chien_dich)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.id_quang_cao)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.url_cuoi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.luot_hien_thi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.luot_click)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.luot_chuyen_doi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.chi_phi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ty_le_tuong_tac)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.cpc_trung_binh)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <thead>
+        <tr>
+            <th id="tong_so">Tổng số đang hiện:</th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th id="luot_hien_thi"></th>
+            <th id="luot_click"></th>
+            <th id="chi_phi"></th>
+            <th id="ty_le"></th>
+            <th id="cpc"></th>
+        </tr>
+        <tr>
+            <th>
+                Tất cả
+                <a class="" onclick="sumTrangThai()" data-toggle="collapse" href="#sum_trang_thai" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    <svg title="Xem tổng tất cả trạng thái" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z" />
+                    </svg>
+                </a>
+            </th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th id="luot_hien_thi_all"></th>
+            <th id="luot_click_all"></th>
+            <th id="chi_phi_all"></th>
+            <th id="ty_le_all"></th>
+            <th id="cpc_all"></th>
+        </tr>
+    </thead>
+
+    <thead class="collapse" id="sum_trang_thai">
+        <tr>
+            <th style="text-indent: 40px;">
+                Tổng số bật:
+            </th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th id="luot_hien_thi_bat"></th>
+            <th id="luot_click_bat"></th>
+
+            <th id="chi_phi_bat"></th>
+            <th id="ty_le_bat"></th>
+            <th id="cpc_bat"></th>
+        </tr>
+        <tr>
+            <th style="text-indent: 40px;">
+                Tổng số tắt:
+            </th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th id="luot_hien_thi_tat"></th>
+            <th id="luot_click_tat"></th>
+
+            <th id="chi_phi_tat"></th>
+            <th id="ty_le_tat"></th>
+            <th id="cpc_tat"></th>
+        </tr>
+    </thead>
+</table>
+<div style="text-align: center; width: 100%; display: inline-flex; justify-content: center">
+    <div class="d-flex text-center data-container">
+        <div class="paging">
+        </div>
+    </div>
+</div>
+<div class="modal fade log_modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="content">
+            <div class="row">
+                <div class="col-md-4">
+                    Từ khóa:
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Tìm từ khóa khác" name="input_tu_khoa" value="" />
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-info" onclick="getLog(this)">Tìm</button>
+                </div>
+            </div>
+            <br />
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Lượt click</th>
+                        <th>Lượt show</th>
+                    </tr>
+                </thead>
+                <tbody id="log">
+                </tbody>
+                <thead>
+                <tr>
+                    <th>Tổng số</th>
+                    <th id="log_luot_click"></th>
+                    <th id="log_luot_show"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+
+        let page = '@ViewBag.page';
+        let trang_thai_tk = '@ViewBag.trang_thai';
+        let term = '@ViewBag.term';
+        let field_sort = '@ViewBag.field_sort';
+        let sort_order = '@ViewBag.sort_order';
+        $("#trang_thai").val(trang_thai_tk);
+        $("#sort_order").val(sort_order);
+        $("#field_sort").val(field_sort);
+        $("#btn_search").on("click", function() {
+                page = 1;
+                trang_thai_tk = $("#trang_thai").val();
+                field_sort = $("#field_sort").val();
+                sort_order = $("#sort_order").val();
+                search(page);
+                resetSum();
+                getSum();
+
+            });
+
+        function onChangeSwitch(id, me) {
+            let trang_thai = $(me).val();
+            callAPI(`${API_URL}/tukhoa/updatetrangthai?id=${id}&trang_thai=${trang_thai}`,
+                null,
+                "PUT",
+                function(res) {
+                    if (res.success) {
+                        $.notify("Đổi trạng thái thành công", "success");
+                    } else {
+                        $.notify(`Lỗi xảy ra ${res.msg}`, "error");
+                    }
+                });
+        }
+
+        let id_chien_dich = "@(ViewBag.id_chien_dich)", id_quang_cao = "@(ViewBag.id_quang_cao)";
+
+        $(document).ready(function() {
+            search(page);
+            if (id_chien_dich !== "") {
+                $("#tk").attr("href", window.location.href);
+                $("#qc").attr("href", `/quangcao?id_chien_dich=${id_chien_dich}`);
+            }
+
+            getSumAll();
+            if (id_quang_cao !== "") {
+                var url = window.location.href;
+                $("#tk").attr("href", url);
+                // $("#qc").attr("href", `/quangcao?id_chien_dich=${id_chien_dich}`);
+
+                $.get(`${API_URL}/quangcao/get/${id_quang_cao}`,
+                    function(res) {
+                        if (res.success) {
+                            $("#qc").attr("href", `/quangcao?id_chien_dich=${res.data.id_chien_dich}`);
+                            $(".ten_quang_cao h3").html(`Quảng cáo: ${res.data.ten_hien_thi}`);
+
+                            $.get(`${API_URL}/chiendich/get/${res.data.id_chien_dich}`,
+                                function(res) {
+                                    if (res.success) {
+                                        $(".ten_chien_dich a").html(`<b>Chiến dịch: ${res.data.ten}</b>`);
+                                    }
+                                });
+
+                            //$(".ten_chien_dich a").html(`<b>Chiến dịch: ${row.chien_dich}</b>`);
+                        }
+                    });
+
+            }
+
+            resetSum();
+            getSum();
+        });
+
+        function resetSum() {
+            $("#chi_phi").html("0");
+            $("#luot_hien_thi").html("0");
+            $("#luot_click").html("0");
+        }
+
+        function search(page) {
+            let trang_thai = trang_thai_tk;
+
+            let ngay_tao_to = 0, ngay_tao_from = 0, term = $("input[name='term']").val();
+            if (typeof term === 'undefined')
+                term = "";
+            if ($("#ngay_tao_from").val() !== "") {
+                ngay_tao_from = Math.floor(toDate($('#ngay_tao_from').val()).getTime() / 1000.0);
+            }
+            if ($("#ngay_tao_to").val() !== "") {
+                ngay_tao_to = Math.floor(toDate($('#ngay_tao_to').val()).getTime() / 1000.0);
+                ngay_tao_to = (ngay_tao_to + 86399);
+            }
+
+            let field_sort_val = $("#field_sort").val();
+            if (typeof field_sort === 'undefined')
+                field_sort = "";
+            let sort_order_val = $("#sort_order").val();
+
+            let url_push =
+                `term=${term}&trang_thai=${trang_thai}&page=${page}&id_chien_dich=${id_chien_dich}&id_quang_cao=${
+                    id_quang_cao}&field_sort=${field_sort}&sort_order=${sort_order}`;
+
+            window.history.pushState(window.location.href, "Danh sách từ khóa", `?${url_push}`);
+
+            let tab_ung_vien = $('#table_data').DataTable({
+                destroy: true,
+                "ordering": false,
+                "autoWidth": false,
+                "dom": 'rt', /*https://datatables.net/reference/option/dom*/
+                searchPanes: {
+                    controls: false,
+                    orderable: false
+                },
+                "language": {
+                    "emptyTable": "Không tìm thấy từ khóa"
+                },
+                ajax: function(data, callback) {
+
+                    let url =
+                        `${API_URL}/tukhoa/all?term=${term}&id_chien_dich=${id_chien_dich}&id_quang_cao=${id_quang_cao
+                            }&ngay_tao_to=${ngay_tao_to}&ngay_tao_from=${ngay_tao_from}&trang_thai=${trang_thai
+                            }&field_sort=${field_sort_val}&sort_order=${sort_order_val}&page=${
+                            page}&page_size=${PAGE_SIZE}`;
+
+                    $.get(url,
+                        {
+                        },
+                        function(res) {
+                            $(".total_recs").html("Tổng: " + res.total);
+
+                            paging(res.total, 'search', page);
+                            callback({
+                                recordsTotal: res.total,
+                                recordsFiltered: res.total,
+                                data: res.data
+                            });
+                        }).fail(function() {
+                        callback({
+                            recordsTotal: 0,
+                            recordsFiltered: 0,
+                            data: []
+                        });
+                    });
+
+                },
+                columns: [
+                    {
+                        "data": "tu_khoa",
+                        "name": "Từ khóa",
+                        "searchable": true,
+                        "width": "30%"
+                    },
+
+                    { "data": "kieu_doi_sanh", "name": "Đối sánh", "searchable": false, "width": "100px" },
+                    { "data": "trang_thai", "name": "Trạng thái", "searchable": false, "width": "150px" },
+                    { "data": "id_quang_cao", "name": "Quảng cáo", "visible": true, "width": "150px" },
+                    { "data": "id_chien_dich", "name": "Chiến dịch", "visible": true, "width": "150px" },
+                    { "data": "url_cuoi", "searchable": false, "width": "10px" },
+                    { "data": "luot_hien_thi", "searchable": false, "width": "50px" },
+                    { "data": "luot_click", "searchable": false, "width": "50px" },
+                    { "data": "luot_chuyen_doi", "visible": false, "searchable": false, "width": "50px" },
+                    { "data": "chi_phi", "searchable": false, "width": "120px" },
+                    { "data": "ty_le_tuong_tac", "name": "Tỷ lệ tương tác", "searchable": false, "width": "70px" },
+                    { "data": "cpc_trung_binh", "name": "CPC T/b", "searchable": false, "width": "70px" }
+                ],
+                "columnDefs": [
+                    {
+                        "render": function(data, type, row) {
+                            if (id_quang_cao !== "") {
+                                $(".ten_quang_cao h3").html(`Quảng cáo: ${row.quang_cao}`);
+                                $(".ten_chien_dich a").html(`<b>Chiến dịch: ${row.chien_dich}</b>`);
+                                var url = window.location.href;
+                                $("#tk").attr("href", url);
+                                $("#qc").attr("href", `/quangcao?id_chien_dich=${row.id_chien_dich}`);
+                            }
+                            let tu_khoa;
+                            switch (row.kieu_doi_sanh) {
+                            case 0:
+                                tu_khoa = row.tu_khoa;
+                                break;
+                            case 1:
+                                tu_khoa = `"${row.tu_khoa}"`;
+                                break;
+                            case 2:
+                                tu_khoa = `[${row.tu_khoa}]`;
+                                break;
+                            }
+                            let html_tmp = "";
+
+                            if (row.trang_thai === 0) {
+                                html_tmp += `<select class="switch-option" id="switch" onchange="onChangeSwitch('${
+                                    row.id
+                                    }', this)"><option selected value="0">Bật</option><option value="1">Dừng</option></select>&nbsp`;
+                            } else if (row.trang_thai === 1) {
+                                html_tmp += `<select class="switch-option" id="switch" onchange="onChangeSwitch('${
+                                    row.id
+                                    }', this)"><option value="0">Bật</option><option selected value="1">Dừng</option></select>&nbsp`;
+                            }
+
+                            if (id_chien_dich !== "") {
+                                $(".ten_chien_dich a").html(`<b>Chiến dịch: ${row.chien_dich}</b>`);
+
+                                html_tmp += `<a href="/tukhoa/edit?id=${row.id}&id_chien_dich=${id_chien_dich}">${
+                                    tu_khoa}</a>`;
+                            } else if (id_quang_cao !== "") {
+                                html_tmp += `<a href="/tukhoa/edit?id=${row.id}&id_quang_cao=${id_quang_cao}">${tu_khoa
+                                    }</a>`;
+                            } else {
+                                html_tmp += `<a href="/tukhoa/edit/${row.id}">${tu_khoa}</a>`;
+                            }
+
+                            html_tmp += `<br><a target='_blank' href='/quangcao/viewad/${row.id_quang_cao}?id_tk=${
+                                row.id}' style="color:#006621">Xem QC</a>`;
+                            html_tmp += `<br><a target='_blank' href='/quangcao/tukhoa?tu_khoa=${row.tu_khoa
+                                }&so_luong=5&dia_diem=' style="color:#006621">Xem QC theo từ khóa</a>`;
+                            html_tmp += `<br><a data-toggle="modal" href="#" data-target=".log_modal" data-tukhoa="${row.tu_khoa}" onclick="getLog(this)" style="color:#006621">Log từ khóa</a>`;
+
+                            return html_tmp;
+                        },
+                        "targets": 0
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = "";
+                            switch (row.kieu_doi_sanh) {
+                            case 0:
+                                html_tmp = "Đối sánh rộng";
+                                break;
+                            case 1:
+                                html_tmp = "Khớp cụm từ";
+                                break;
+                            case 2:
+                                html_tmp = "Khớp chính xác";
+                                break;
+                            }
+                            return html_tmp;
+                        },
+                        "targets": 1
+                    },
+                    {
+                        "render": function(data, type, row) {
+
+                            let html_tmp = "";
+                            let trang_thai = row.trang_thai;
+                            let trang_thai_quang_cao = row.trang_thai_quang_cao;
+                            let trang_thai_chien_dich = row.trang_thai_chien_dich;
+
+                            if (trang_thai === trang_thai_quang_cao && trang_thai === trang_thai_chien_dich) {
+                                html_tmp += "<p>Đang hoạt động</p>";
+                            } else {
+                                if (row.trang_thai === 1) {
+                                    html_tmp += "<p>Từ khóa đã dừng</p>";
+                                }
+                                if (row.trang_thai_chien_dich === 1) {
+                                    html_tmp += "<p>Chiến dịch đã dừng</p>";
+                                }
+                                if (row.trang_thai_quang_cao === 1) {
+                                    html_tmp += "<p>Quảng cáo đã dừng</p>";
+                                }
+                            }
+                            //switch (row.trang_thai) {
+                            //case 0:
+                            //    html_tmp = "BẬT";
+                            //    break;
+                            //case 1:
+                            //    html_tmp = "TẠM DỪNG";
+                            //    break;
+                            //case 2:
+                            //    html_tmp = "XÓA";
+                            //    break;
+                            //}
+
+                            return html_tmp;
+                        },
+                        "targets": 2,
+                        "visible": true
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp =
+                                `<a href='/chiendich?id_chien_dich=${row.id_chien_dich}' target='_blank'>${row
+                                    .chien_dich
+                                    }</a>`;
+                            return html_tmp;
+                        },
+                        "targets": 3
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp =
+                                `<a href='/quangcao?id_quang_cao=${row.id_quang_cao}' target='_blank'>${row.quang_cao
+                                    }</a>`;
+                            return html_tmp;
+                        },
+                        "targets": 4
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `<span>${row.url_cuoi}</span>`;
+                            return html_tmp;
+                        },
+                        "targets": 5
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${formatCurency(row.chi_phi)} đ`;
+                            return html_tmp;
+                        },
+                        "targets": 9
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${row.ty_le_tuong_tac.toFixed(0)} %`;
+                            return html_tmp;
+                        },
+                        "targets": 10
+
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${formatCurency(row.cpc_trung_binh.toFixed(0))} ₫`;
+                            return html_tmp;
+                        },
+                        "targets": 11
+                    },
+                ],
+                pageLength: PAGE_SIZE,
+                responsive: true,
+                serverSide: true,
+                processing: true
+            });
+        }
+
+        function getLog(me) {
+            $("#log").children().remove();
+            let tu_khoa = $(me).data('tukhoa');
+            let input_tu_khoa ;
+            if (typeof tu_khoa !== 'undefined') {
+                $("input[name='input_tu_khoa']").val(tu_khoa);
+            }
+            input_tu_khoa = $("input[name='input_tu_khoa']").val();
+
+            $.get(`${API_URL}/log/getlog?term=${input_tu_khoa}&ai=xmads`,
+                function(res) {
+                    if (res.success) {
+                        let html = "";
+                        res.data.forEach(function (item) {
+                            html += `<tr><td>${ticksToDateString(item.d)}</p>`;
+                            html += `<td>${typeof item.ext.c !== 'undefined' ? item.ext.c.c: 0}</td>`;
+                            html += `<td>${typeof item.ext.s !== 'undefined' ? item.ext.s.c: 0}</td>`;
+                            html += "</tr>";
+                        });
+                        $("#log").html(html);
+                    }
+                });
+
+
+            $.get(`${API_URL}/log/sumlog?term=${input_tu_khoa}&ai=xmads`,
+                function (res) {
+                    if (res.success) {
+                        console.log(res);
+                        $("#log_luot_show").html(res.data.luot_show);
+                        $("#log_luot_click").html(res.data.luot_click);
+                    }
+                });
+
+        }   
+
+
+
+        function getSum() {
+            let term = $("input[name='term']").val();
+            if (typeof term === 'undefined')
+                term = "";
+            let trang_thai = trang_thai_tk;
+            $.ajax
+            ({
+                type: 'GET',
+                url: `${API_URL}/tukhoa/getsum`,
+                dataType: 'json',
+                data: {
+                    term: term,
+                    trang_thai: trang_thai,
+                    id_chien_dich: id_chien_dich,
+                    id_quang_cao: id_quang_cao
+                },
+                success: function(res) {
+                    if (res.success) {
+                        $("#chi_phi").html(formatCurency(res.data.chi_phi) + "đ");
+                        $("#luot_hien_thi").html(res.data.luot_hien_thi);
+                        $("#luot_click").html(res.data.luot_click);
+                        $("#ty_le").html(res.data.ty_le.toFixed(1) + "%");
+                        $("#cpc").html(formatCurency(res.data.cpc.toFixed(0)) + "đ");
+                        
+                        try {
+                            var data = google.visualization.arrayToDataTable([
+                                ['Element', 'Số lượng', { role: 'style' }],
+                                ['Luợt click', res.data.luot_click, 'gold'],
+                                ['Lượt hiển thị', res.data.luot_hien_thi, 'color: #3366CC']
+                            ]);
+                            var options = {
+                                title: 'Thống kê lượt click và lượt hiển thị',
+                                chartArea: { width: '50%' },
+                                legend: { position: "none" },
+                                hAxis: {
+                                    minValue: 0,
+                                    textStyle: {
+                                        bold: true,
+                                        fontSize: 12,
+                                        color: '#4d4d4d'
+                                    },
+                                    titleTextStyle: {
+                                        bold: true,
+                                        fontSize: 18,
+                                        color: '#4d4d4d'
+                                    }
+                                },
+                                vAxis: {
+                                    title: 'Biểu đồ cột',
+                                    textStyle: {
+                                        fontSize: 14,
+                                        bold: true,
+                                        color: '#848484'
+                                    },
+                                    titleTextStyle: {
+                                        fontSize: 14,
+                                        bold: true,
+                                        color: '#848484'
+                                    }
+                                }
+                            };
+                            var chart = new google.visualization.BarChart(document.getElementById('chart'));
+                            chart.draw(data, options);
+                        } catch (e) {
+
+                        }
+                    }
+                },
+                error: function(ex) {
+                    alert("Message: " + ex);
+                }
+            });
+        }
+
+        function getSumAll() {
+            $.get(`${API_URL}/tukhoa/getsumall`,
+                function(res) {
+                    if (res.success) {
+                        $("#chi_phi_all").html(formatCurency(res.data.chi_phi) + "đ");
+                        $("#luot_hien_thi_all").html(res.data.luot_hien_thi);
+                        $("#luot_click_all").html(res.data.luot_click);
+                        $("#ty_le_all").html(res.data.ty_le.toFixed(1) + "%");
+                        $("#cpc_all").html(formatCurency(res.data.cpc.toFixed(0)) + "đ");
+                    }
+                });
+        }
+
+        function sumTrangThai() {
+            getSumTrangThaiBat();
+            getSumTrangThaiTat();
+        }
+
+        function getSumTrangThaiBat() {
+            let trang_thai = 0;
+            $.ajax
+            ({
+                type: 'GET',
+                url: `${API_URL}/tukhoa/getsumtrangthai`,
+                dataType: 'json',
+                data: {
+                    trang_thai: trang_thai
+                },
+                success: function(res) {
+                    if (res.success) {
+                        $("#chi_phi_bat").html(formatCurency(res.data.chi_phi) + "đ");
+                        $("#luot_hien_thi_bat").html(res.data.luot_hien_thi);
+                        $("#luot_click_bat").html(res.data.luot_click);
+                        $("#ty_le_bat").html(res.data.ty_le.toFixed(1) + "%");
+                        $("#cpc_bat").html(formatCurency(res.data.cpc.toFixed(0)) + "đ");
+                    }
+                },
+                error: function(ex) {
+                    alert("Message: " + ex);
+                }
+            });
+        }
+
+        function getSumTrangThaiTat() {
+            let trang_thai = 1;
+            $.ajax
+            ({
+                type: 'GET',
+                url: `${API_URL}/tukhoa/getsumtrangthai`,
+                dataType: 'json',
+                data: {
+                    trang_thai: trang_thai
+                },
+                success: function(res) {
+                    if (res.success) {
+                        $("#chi_phi_tat").html(formatCurency(res.data.chi_phi) + "đ");
+                        $("#luot_hien_thi_tat").html(res.data.luot_hien_thi);
+                        $("#luot_click_tat").html(res.data.luot_click);
+                        $("#ty_le_tat").html(res.data.ty_le.toFixed(1) + "%");
+                        $("#cpc_tat").html(formatCurency(res.data.cpc.toFixed(0)) + "đ");
+                    }
+                },
+                error: function(ex) {
+                    alert("Message: " + ex);
+                }
+            });
+        }
+
+        google.charts.load('visualization', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(getSum);
+    </script>
+
+}

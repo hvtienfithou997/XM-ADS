@@ -1,0 +1,148 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.User
+
+@{
+    ViewData["Title"] = "Chỉnh sửa";
+
+}
+<h4>Cập nhật người dùng</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group" style="display:none;">
+            <label asp-for="id" class="control-label">Id</label>
+            <input asp-for="id" readonly class="form-control" id="id_user" />
+            <span asp-validation-for="user_name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="user_name" class="control-label">Tên đăng nhập</label>
+            <input asp-for="user_name" readonly class="form-control" id="user_name" />
+            <input class="d-none form-control" id="password" />
+
+            <span asp-validation-for="user_name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="full_name" class="control-label">Họ tên</label>
+            <input asp-for="full_name" class="form-control" id="full_name" />
+            <span asp-validation-for="full_name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="email" class="control-label">Email</label>
+            <input asp-for="email" class="form-control" id="email" />
+            <span asp-validation-for="email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ngan_sach" class="control-label">Ngân sách</label>
+            <input asp-for="ngan_sach" class="form-control" id="ngan_sach" onkeyup="splitInDots(this)" onblur="splitInDots(this)" />
+            
+        </div>
+    </div><div class="col-md-6">
+        @if (User.IsInRole(Role.ADMIN.ToString()))
+        {
+            <div class="form-group">
+                <label asp-for="roles" class="control-label">Role</label>
+                <ul class="check-box">
+                    @foreach (var item in Enum.GetValues(typeof(Role)))
+                    {
+
+                        @if ((Role)item == Role.ADMIN)
+                        {
+                            @if (User.IsInRole(Role.ADMIN.ToString()))
+                            {
+                                <li>
+                                    <input type="checkbox" name="role" value="@Enum.GetName(typeof(Role),item)">
+                                    @Enum.GetName(typeof(Role), item)
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li>
+                                <input type="checkbox" name="role" value="@Enum.GetName(typeof(Role),item)">
+                                @Enum.GetName(typeof(Role), item)
+                            </li>
+                        }
+
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <input type="button" value="Cập nhật" class="btn-size btn btn-primary" onclick="onUpdate()" />
+        </div>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Quay lại danh sách</a>
+</div>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<script>
+    let id = "@ViewBag.id";
+
+    $.get(`${API_URL}/user/view?id=${id}`, function (res) {
+        console.log(res);
+        if (res.success) {
+            let user = res.data;
+            $("#user_name").val(user.user_name);
+            $("#full_name").val(user.full_name);
+            $("#email").val(user.email);
+            user.roles.forEach(item => {
+                $(`[name='role'][value='${item}']`).prop("checked", true);
+            });
+            $("#ngan_sach").val(formatCurency(user.ngan_sach));
+        }
+    });
+
+
+
+    function onUpdate() {
+        let roles = [];
+        $("[name='role']:checked").each(function () {
+            roles.push($(this).val());
+        });
+        let obj = {
+            "full_name": $("#full_name").val(),
+            "roles": roles,
+            "ngan_sach": replaceDot($("#ngan_sach").val())
+         
+        };
+        $.ajax({
+            type: "PUT",
+            contentType: 'application/json',
+            dataType: "json",
+            url: `${API_URL}/user/${id}`,
+            data: JSON.stringify(obj),
+            success: function (res) {
+                $("#div_loader").remove();
+                $.notify("Sửa thành công", "success");
+                
+            },
+            failure: function (response) {
+                $("#div_loader").remove();
+                console.log(`Lỗi xảy ra ${response.error}`, "error");
+            },
+            error: function (request, textStatus, errorThrown) {
+                $("#div_loader").remove();
+                if (request.status == 401) {
+                    let token_exp = request.getResponseHeader('token-expired');
+                    if (token_exp != null && token_exp == 'true') {
+                        document.location.href = "/";
+                    }
+                    console.log(request.statusText);
+                }
+            }
+        });
+    }
+
+</script>
+
+

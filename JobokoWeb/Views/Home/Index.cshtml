@@ -1,0 +1,264 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    .table {
+        margin-top: 10px;
+    }
+</style>
+
+<div class="text-center">
+
+    @*<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <label class="font-weight-bold">Chiến dịch</label><br>
+
+        <select id="sort-field-cd">
+            <option value="chi_phi">Chi phí</option>
+            <option value="luot_click">Lượt nhấp</option>
+        </select>
+
+        <select id="sort-direction-cd">
+            <option value="0">Tăng</option>
+            <option value="1" selected>Giảm</option>
+        </select>
+        <button class="btn-primary" onclick="getChienDich()">Lọc</button>
+        <div id="chart_chien_dich"></div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Chiến dịch</th>
+                    <th scope="col">Chi phí</th>
+                    <th scope="col">Lượt nhấp</th>
+                    <th scope="col">CTR</th>
+                </tr>
+            </thead>
+            <tbody id="table_chien_dich">
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <label class="font-weight-bold">Từ khóa tìm kiếm</label><br>
+        <select class="" id="sort-field-tk">
+            <option value="chi_phi">Chi phí</option>
+            <option value="luot_click">Lượt nhấp</option>
+        </select>
+
+        <select id="sort-direction-tk">
+            <option value="0">Tăng</option>
+            <option value="1" selected>Giảm</option>
+        </select>
+
+        <button class="btn-primary" onclick="getTuKhoa()">Lọc</button>
+        <div id="chart"></div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Từ khóa</th>
+                    <th scope="col">Chi phí</th>
+                    <th scope="col">Lượt nhấp</th>
+                    <th scope="col">CTR</th>
+                </tr>
+            </thead>
+            <tbody id="table_tu_khoa">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        getTuKhoa();
+        getChienDich();
+        getSumAll();
+    });
+    google.charts.load('visualization', { packages: ['corechart'] });
+    google.charts.setOnLoadCallback(getSumAll);
+
+    function getSumAll() {
+        $.get(`${API_URL}/tukhoa/getsumall`,
+            function (res) {
+                if (res.success) {
+                   
+
+                    try {
+                        var data = google.visualization.arrayToDataTable([
+                            ['Element', 'Số lượng', { role: 'style' }],
+                            ['Luợt click', res.data.luot_click, 'gold'],
+                            ['Lượt hiển thị', res.data.luot_hien_thi, 'color: #3366CC']
+                        ]);
+                         var options = {
+                        title: 'Thống kê lượt click và lượt hiển thị',
+                        chartArea: { width: '70%' },
+                        legend: { position: "none" },
+                        hAxis: {
+
+                            minValue: 0,
+                            textStyle: {
+                                bold: true,
+                                fontSize: 12,
+                                color: '#4d4d4d'
+                            },
+                            titleTextStyle: {
+                                bold: true,
+                                fontSize: 18,
+                                color: '#4d4d4d'
+                            }
+                        },
+                        vAxis: {
+                            title: 'Biểu đồ cột',
+                            textStyle: {
+                                fontSize: 14,
+                                bold: true,
+                                color: '#848484'
+                            },
+                            titleTextStyle: {
+                                fontSize: 14,
+                                bold: true,
+                                color: '#848484'
+                            }
+                        }
+                    };
+                    var chart = new google.visualization.BarChart(document.getElementById('chart'));
+                    chart.draw(data, options);
+                    } catch (e) {
+
+                    } 
+                }
+            });
+        setTimeout(function () {
+            getSumChienDich();
+        },200);
+    }
+
+    function getSumChienDich() {
+        $.get(`${API_URL}/chiendich/getsumall`,
+            function (res) {
+                if (res.success) {
+                    var data = google.visualization.arrayToDataTable([
+                        ['Element', 'Số lượng', { role: 'style' }],
+                        ['Luợt click', res.data.luot_click, 'gold'],
+                        ['Lượt hiển thị', res.data.luot_hien_thi, 'color: #3366CC']
+                    ]);
+
+                    var options = {
+                        title: 'Thống kê lượt click và lượt hiển thị',
+                        chartArea: { width: '70%' },
+                        legend: { position: "none" },
+                        hAxis: {
+
+                            minValue: 0,
+                            textStyle: {
+                                bold: true,
+                                fontSize: 12,
+                                color: '#4d4d4d'
+                            },
+                            titleTextStyle: {
+                                bold: true,
+                                fontSize: 18,
+                                color: '#4d4d4d'
+                            }
+                        },
+                        vAxis: {
+                            title: 'Biểu đồ cột',
+                            textStyle: {
+                                fontSize: 14,
+                                bold: true,
+                                color: '#848484'
+                            },
+                            titleTextStyle: {
+                                fontSize: 14,
+                                bold: true,
+                                color: '#848484'
+                            }
+                        }
+                    };
+                    var chart = new google.visualization.BarChart(document.getElementById('chart_chien_dich'));
+                    chart.draw(data, options);
+                }
+            });
+    }
+
+    function getTuKhoa() {
+        var sort = $("#sort-field-tk").val();
+        var desc = $("#sort-direction-tk").val();
+        let url = `${API_URL}/tukhoa/overview?sort=${sort}&desc=${desc}`;
+        $.get(url,
+            {
+            },
+            function (res) {
+                if (res.success) {
+                    let tu_khoa = res.data;
+                    let count = 1;
+                    let html = "";
+                    tu_khoa.forEach(function (item) {
+                        let title = item.trang_thai === 0 ? "Từ khóa đang hoạt động" : "Từ khóa đã tạm dừng";
+                        html += `<tr title="${title}">`;
+                        html += `<td>${count}</td>`;
+                        let text = "";
+                        switch (item.kieu_doi_sanh) {
+                            case 0:
+                                text = item.tu_khoa;
+                                break;
+                            case 1:
+                                text = `"${item.tu_khoa}"`;
+                                break;
+                            case 2:
+                                text = `[${item.tu_khoa}]`;
+                                break;
+                        }
+
+                        let dot = item.trang_thai === 0 ? "dot" : "dot1";
+                        html += `<td><span class="${dot}"></span> ${text}</td>`;
+                        html += `<td>${item.chi_phi = item.chi_phi.toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}</td>`;
+                        html += `<td>${item.luot_click}</td>`;
+                        let ctr = ((item.luot_click / item.luot_hien_thi) * 100).toFixed(1);
+
+                        ctr = !isNaN(ctr) ? ctr : '0.0';
+                        ctr = isFinite(ctr) ? ctr : '0.0';
+                        html += `<td>${ctr}%</td></tr>`;
+
+                        count++;
+                    });
+                    $("#table_tu_khoa").html(html);
+                }
+            });
+    }
+
+    function getChienDich() {
+        var sort = $("#sort-field-cd").val();
+        var desc = $("#sort-direction-cd").val();
+        let url = `${API_URL}/chiendich/overview?sort=${sort}&desc=${desc}`;
+        $.get(url,
+            {
+            },
+            function (res) {
+                if (res.success) {
+                    let chien_dich = res.data;
+                    let count = 1;
+                    let html = "";
+                    chien_dich.forEach(function (item) {
+                        let title = item.trang_thai === 0 ? "Chiến dịch đang hoạt động" : "Chiến dịch đã tạm dừng";
+                        html += `<tr title="${title}">`;
+                        html += `<td>${count}</td>`;
+                        let dot = item.trang_thai === 0 ? "dot" : "dot1";
+                        html += `<td><span class="${dot}"></span> ${item.ten}</td>`;
+                        html += `<td>${item.chi_phi = item.chi_phi.toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}</td>`;
+                        html += `<td>${item.luot_click}</td>`;
+                        let ctr = ((item.luot_click / item.luot_hien_thi) * 100).toFixed(1);
+                        ctr = !isNaN(ctr) ? ctr : '0.0';
+                        ctr = isFinite(ctr) ? ctr : '0.0';
+                        html += `<td>${ctr}%</td></tr>`;
+                        count++;
+                    });
+                    $("#table_chien_dich").html(html);
+                }
+            });
+    }
+</script>

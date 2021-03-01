@@ -1,0 +1,174 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.ChienDich
+
+@{
+    ViewData["Title"] = "Sửa chiến dịch";
+    string id = "";
+    if (ViewData["id"] != null)
+    {
+        id = Convert.ToString(ViewData["id"]);
+    }
+}
+
+<h4>Sửa chiến dịch</h4>
+
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ten" class="control-label"></label>
+                <input asp-for="ten" class="form-control" />
+                <span asp-validation-for="ten" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="trang_thai" class="control-label"></label>
+                <select asp-for="trang_thai" class="form-control" asp-items="Html.GetEnumSelectList<TrangThaiChienDich>()">
+                </select>
+                <span asp-validation-for="trang_thai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ngan_sach" class="control-label"></label>
+                <input id="ngan_sach" class="form-control" onkeyup="splitInDots(this)" onblur="splitInDots(this)" />
+                <span asp-validation-for="ngan_sach" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label asp-for="gia_thau" class="control-label"></label>
+                        <select id="ten_gia_thau" class="form-control">
+                            <option selected="selected" value="CLICK">Lượt nhấp</option>
+                            <option value="CONVERT">Lượt chuyển đổi</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="control-label">Giá tối đa</label>
+                        <input id="gia_toi_da" class="form-control" value="1.000" onkeyup="splitInDots(this)" onblur="splitInDots(this)" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="ngay_bat_dau" class="control-label"></label>
+                <input type="text" name="ngay_bd" class="form-control datepicker" autocomplete="off" />
+                <input type="hidden" id="ngay_bat_dau" name="ngay_bat_dau" class="form-control" />
+                <span asp-validation-for="ngay_bat_dau" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ngay_ket_thuc" class="control-label"></label>
+                <input name="ngay_kt" class="form-control datepicker" autocomplete="off" />
+                <input type="hidden" id="ngay_ket_thuc" name="ngay_ket_thuc" class="form-control" />
+                <span asp-validation-for="ngay_ket_thuc" class="text-danger"></span>
+                <label asp-for="ip_loai_tru" class="control-label"></label><span class="text-danger"> (Mỗi IP một dòng.)</span>
+                <textarea name="ip_loai_tru" class="form-control" autocomplete="off"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Lưu" id="btn_save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Quay lại</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $('[name="ngay_bd"]').datepicker({
+            format: 'dd-mm-yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('show', function () {
+            try {
+                $('[name="ngay_bd"]').datepicker('setEndDate', $('[name="ngay_kt"]').val());
+
+            } catch (e){
+
+            }
+        }).on('hide', function (e) {
+            if (e.dates.length > 0) {
+                $("#ngay_bat_dau").val(e.date.getTime() / 1000);
+            }
+        });
+        $('[name="ngay_kt"]').datepicker({
+            format: 'dd-mm-yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('show', function () {
+            try {
+                $('[name="ngay_kt"]').datepicker('setStartDate', $('[name="ngay_bd"]').val());
+
+            } catch (e){
+
+            }
+        }).on('hide', function (e) {
+            if (e.dates.length > 0) {
+                $("#ngay_ket_thuc").val(e.date.getTime() / 1000);
+            }
+        });
+        $("#btn_save").click(function (e) {
+            e.preventDefault();
+            let ip_loai_tru = $("textarea[name='ip_loai_tru']").val().split('\n');
+            
+                let obj = {
+                    "ten": $("#ten").val(),
+                    "trang_thai": $("#trang_thai > option:selected").val(),
+                    "ngan_sach": replaceDot($("#ngan_sach").val()),
+                    "ngay_bat_dau": $("#ngay_bat_dau").val(),
+                    "ngay_ket_thuc": $("#ngay_ket_thuc").val(),
+                    "gia_thau": {
+                        "ten": $("#ten_gia_thau>option:selected").val(),
+                        "gia_toi_da": replaceDot($("#gia_toi_da").val())
+                    },
+                    "ip_loai_tru": ip_loai_tru
+                };
+                $.ajax({
+                    type: "PUT",
+                    contentType: 'application/json',
+                    dataType: "json",
+                    url: `${API_URL}/chiendich/update/@id`,
+                    data: JSON.stringify(obj),
+                    success: function (res) {
+                        $("#div_loader").remove();
+                        document.location = "/chiendich";
+                    },
+                    failure: function (response) {
+                        $("#div_loader").remove();
+                        console.log(`Lỗi xảy ra ${response.error}`, "error");
+                    },
+                    error: function (request, textStatus, errorThrown) {
+                        $("#div_loader").remove();
+                        if (request.status == 401) {
+                            let token_exp = request.getResponseHeader('token-expired');
+                            if (token_exp != null && token_exp == 'true') {
+                                document.location.href = "/";
+                            }
+                            console.log(request.statusText);
+                        }
+                    }
+                });
+        });
+        $.get(`${API_URL}/chiendich/get/@id`, function (res) {
+
+            if (res.success) {
+                let chien_dich = res.data;
+
+                $("#ten").val(chien_dich.ten);
+                $("#ngan_sach").val(chien_dich.ngan_sach); $("#ngan_sach").blur();
+                $("[name='ngay_bd']").val(epochToTime(chien_dich.ngay_bat_dau));
+                $("#ngay_bat_dau").val(chien_dich.ngay_bat_dau);
+                $("[name='ngay_kt']").val(epochToTime(chien_dich.ngay_ket_thuc));
+                $("#ngay_ket_thuc").val(chien_dich.ngay_ket_thuc);
+                $("#trang_thai").val(chien_dich.trang_thai);
+                if (typeof chien_dich.gia_thau !== 'undefined') {
+                    $("#ten_gia_thau").val(chien_dich.gia_thau.ten);
+                    $("#gia_toi_da").val(chien_dich.gia_thau.gia_toi_da); $("#gia_toi_da").blur();
+                }
+                $("textarea[name='ip_loai_tru']").val(chien_dich.ip_loai_tru.join("\n"));
+
+            }
+        });
+    </script>
+}

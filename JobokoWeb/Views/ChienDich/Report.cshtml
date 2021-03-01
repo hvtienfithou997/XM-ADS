@@ -1,0 +1,176 @@
+﻿@using JobokoAdsModels
+@model IEnumerable<JobokoAdsModels.ChienDich>
+@{
+    ViewData["Title"] = "Báo cáo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Tên từ khóa</label>
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Tên quảng cáo</label>
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Ngày bắt đầu</label>
+    </div>
+    <div class="col-md-2">
+        <label class="control-label">Ngày kết thúc</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <div class="form-group">
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <input placeholder="Tìm kiếm từ khóa" name="tu_khoa" id="tu_khoa" value="" class="form-control" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group">
+            <input placeholder="Tìm kiếm quảng cáo" name="quang_cao" id="quang_cao" value="" class="form-control" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <input name="ngay_bd" class="form-control datepicker" autocomplete="off" />
+        <input type="hidden" id="ngay_bat_dau" value="0" name="ngay_bat_dau" class="form-control" />
+    </div>
+    <div class="col-md-2">
+
+        <input name="ngay_kt" class="form-control datepicker" autocomplete="off" />
+        <input type="hidden" id="ngay_ket_thuc" value="0" name="ngay_ket_thuc" class="form-control" />
+    </div>
+    <div class="col-md-1">
+        <button id="btn_search" onclick="getChienDich()" class="btn btn-primary">Tìm</button>
+    </div>
+</div>
+<div class="total_recs"></div>
+<table class="table" id="table_data">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ten)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.trang_thai)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.luot_click)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.luot_hien_thi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.cpc_trung_binh)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.chi_phi)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $('[name="ngay_bd"]').datepicker({
+            format: 'dd/mm/yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('show',
+            function () {
+                try {
+                    $('[name="ngay_bd"]').datepicker('setEndDate', $('[name="ngay_kt"]').val());
+                    $(this).blur();
+                } catch (e) {
+                }
+
+            }).on('hide',
+                function (e) {
+                    if (e.dates.length > 0) {
+                        $("#ngay_bat_dau").val(e.date.getTime() / 1000);
+                    } else {
+                        $("#ngay_bat_dau").val(0);
+                    }
+                });
+        $('[name="ngay_kt"]').datepicker({
+            format: 'dd/mm/yyyy',
+            changeMonth: true,
+            changeYear: true
+        }).on('show',
+            function () {
+                try {
+                    $('[name="ngay_kt"]').datepicker('setStartDate', $('[name="ngay_bd"]').val());
+                    $(this).blur();
+                } catch (e) {
+                }
+
+            }).on('hide',
+                function (e) {
+                    if (e.dates.length > 0) {
+                        $("#ngay_ket_thuc").val(e.date.getTime() / 1000);
+                    } else {
+                        $("#ngay_ket_thuc").val(0);
+                    }
+                });
+
+        function getChienDich() {
+            let tu_khoa = $("#tu_khoa").val();
+            let quang_cao = $("#quang_cao").val();
+            let ngay_bat_dau = $("#ngay_bat_dau").val();
+            let ngay_ket_thuc = $("#ngay_ket_thuc").val();
+            $("#table_data tbody").children().remove();
+            $.ajax
+                ({
+                    type: 'GET',
+                    url: `${API_URL}/chiendich/report`,
+                    dataType: 'json',
+                    data: {
+                        tu_khoa: tu_khoa,
+                        quang_cao: quang_cao,
+                        ngay_bat_dau: ngay_bat_dau,
+                        ngay_ket_thuc: ngay_ket_thuc
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            let html = "";
+                            res.data.forEach(function (item) {
+                                html += "<tr>";
+                                html += `<td>${item.ten}</td>`;
+                                let html_tmp = "";
+                                switch (item.trang_thai) {
+                                    case 0:
+                                        html_tmp = "BẬT";
+                                        break;
+                                    case 1:
+                                        html_tmp = "TẠM DỪNG";
+                                        break;
+                                    case 2:
+                                        html_tmp = "XÓA";
+                                        break;
+                                }
+                                html += `<td>${html_tmp}</td>`;
+                                html += `<td>${item.luot_click}</td>`;
+                                html += `<td>${item.luot_hien_thi}</td>`;
+                                html += `<td>${formatCurency(item.cpc_trung_binh)} đ</td>`;
+                                html += `<td>${formatCurency(item.chi_phi)} đ</td>`;
+                                html += "</t>";
+                            });
+                            $("#table_data tbody").html(html);
+                        }
+                    },
+                    error: function (ex) {
+                        alert("Message: " + ex);
+                    }
+                });
+        }
+    </script>
+}

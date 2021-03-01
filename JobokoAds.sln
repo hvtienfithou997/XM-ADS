@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobokoAdsAPI", "JobokoAdsAPI\JobokoAdsAPI.csproj", "{68AE5FB6-9CAC-42BC-AC6F-D30EE7461578}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobokoAdsModels", "JobokoAdsModels\JobokoAdsModels.csproj", "{EAB3D23A-3E5D-46E3-AEA5-CF45A9EDE9E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobokoAdsES", "JobokoAdsES\JobokoAdsES.csproj", "{B3CAB921-D338-4741-A25A-230447582A58}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JobokoWeb", "JobokoWeb\JobokoWeb.csproj", "{1DD1F09F-7683-4CC2-9BCC-4FC3819947B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobokoService", "JobokoService\JobokoService.csproj", "{CF34FC5D-456E-4BBC-ABB4-3F304F719ABC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobokoServiceToiUu", "JobokoServiceToiUu\JobokoServiceToiUu.csproj", "{095809A4-C06E-4596-B409-DCE87DF735E9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68AE5FB6-9CAC-42BC-AC6F-D30EE7461578}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68AE5FB6-9CAC-42BC-AC6F-D30EE7461578}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68AE5FB6-9CAC-42BC-AC6F-D30EE7461578}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68AE5FB6-9CAC-42BC-AC6F-D30EE7461578}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAB3D23A-3E5D-46E3-AEA5-CF45A9EDE9E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAB3D23A-3E5D-46E3-AEA5-CF45A9EDE9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAB3D23A-3E5D-46E3-AEA5-CF45A9EDE9E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAB3D23A-3E5D-46E3-AEA5-CF45A9EDE9E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3CAB921-D338-4741-A25A-230447582A58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3CAB921-D338-4741-A25A-230447582A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3CAB921-D338-4741-A25A-230447582A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3CAB921-D338-4741-A25A-230447582A58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DD1F09F-7683-4CC2-9BCC-4FC3819947B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DD1F09F-7683-4CC2-9BCC-4FC3819947B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DD1F09F-7683-4CC2-9BCC-4FC3819947B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DD1F09F-7683-4CC2-9BCC-4FC3819947B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF34FC5D-456E-4BBC-ABB4-3F304F719ABC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF34FC5D-456E-4BBC-ABB4-3F304F719ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF34FC5D-456E-4BBC-ABB4-3F304F719ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF34FC5D-456E-4BBC-ABB4-3F304F719ABC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{095809A4-C06E-4596-B409-DCE87DF735E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{095809A4-C06E-4596-B409-DCE87DF735E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{095809A4-C06E-4596-B409-DCE87DF735E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{095809A4-C06E-4596-B409-DCE87DF735E9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D93D269D-D31C-4C6D-9589-BA2139D7CF23}
+	EndGlobalSection
+EndGlobal

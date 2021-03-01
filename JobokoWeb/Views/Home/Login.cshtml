@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="col-sm-12">
+    <div class="form-group">
+        <div class="col-sm-3"><button id="btn_login">Login</button></div>
+    </div>
+</div>
+<script>
+   
+    $(function () {
+        $("#btn_login").click(function () {
+            
+            let obj = { "user": "admin", "pass": "" };
+            $.ajax({
+                type: "POST",
+                contentType: 'application/json',
+                dataType: "json",
+                url: "https://localhost:44362/api/v1.0/token/login",
+                data: JSON.stringify(obj),
+                success: function (res) {
+                    $("#div_loader").remove();
+                    if (res.success) {
+                        API_TOKEN = res.token;
+                    }
+                },
+                failure: function (response) {
+                    $("#div_loader").remove();
+                    console.log(`Lỗi xảy ra ${response.error}`, "error");
+                },
+                error: function (request, textStatus, errorThrown) {
+                    $("#div_loader").remove();
+                    console.log(`Lỗi xảy ra với API, vui lòng xem lại`, "error");
+                    if (request.status == 401) {
+                        let token_exp = request.getResponseHeader('token-expired');
+                        if (token_exp != null && token_exp == 'true') {
+                            document.location.href = "/";
+                        }
+                        console.log(request.statusText);
+                    }
+                }
+            });
+        });
+    });
+</script>

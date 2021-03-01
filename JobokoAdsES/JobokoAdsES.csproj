@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Elasticsearch.Net" Version="7.10.0" />
+    <PackageReference Include="IdGen" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.10" />
+    <PackageReference Include="NEST" Version="7.10.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JobokoAdsModels\JobokoAdsModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="XUtil">
+      <HintPath>..\dll\XUtil.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

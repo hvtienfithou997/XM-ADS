@@ -1,0 +1,93 @@
+﻿@model IEnumerable<JobokoAdsModels.User>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h3>Danh  sách người dùng</h3>
+
+<p>
+    <a asp-action="Add">Taọ tài khoản</a>
+</p>
+
+<div class="row">
+    <div class="col-md-3">
+        <input placeholder="Tìm kiếm tài khoản" name="term" id="term" value="" class="form-control" />
+    </div>
+    <div class="col-md-1">
+        <button id="btn_search" class="btn btn-primary">Tìm</button>
+    </div>
+</div>
+
+<div class="total_recs text-right"></div>
+<table class="table" id="table_data">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.user_name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.full_name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ngan_sach)
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            getUser();
+        });
+        $("#btn_search").on("click",
+            function() {
+                page = 1;
+                getUser();
+
+            });
+
+        function getUser() {
+
+            let term = $("#term").val();
+            $.ajax
+            ({
+                type: 'GET',
+                url: `${API_URL}/user/all`,
+                dataType: 'json',
+                data: {
+                    term: term
+                },
+                success: function(res) {
+                    if (res.success) {
+                        $(".total_recs").html("Tổng: " + res.total);
+                        let html = "";
+                        res.data.forEach(function(item) {
+
+                            html += "<tr>";
+                            html += `<td>${item.user_name}</td>`;
+                            html += `<td>${item.full_name}</td>`;
+                            html += `<td>${item.email}</td>`;
+                            html += `<td>${formatCurency(item.ngan_sach)}</td>`;
+                            html += `<td><a href="user/edit/?id=${item.user_name}">Sửa</a></td>`;
+                            html += "</tr>";
+                        });
+                        $("#table_data tbody").html(html);
+                    }
+                },
+                error: function(ex) {
+                    alert("Message: " + ex);
+                }
+            });
+        }
+    </script>
+}

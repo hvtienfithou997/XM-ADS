@@ -1,0 +1,84 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.User
+
+@{
+    ViewData["Title"] = "Add";
+}
+<h4>User</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group d-none">
+            <label asp-for="user_name" class="control-label">Tên đăng nhập</label>
+            <input asp-for="user_name" class="form-control" id="user_name" />
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="email" class="control-label">Tên đăng nhập / Email</label>
+            <input asp-for="email" class="form-control" id="email" />
+            <span asp-validation-for="email" class="text-danger"></span>
+        </div>
+       
+        <div class="form-group">
+            <label class="control-label">Mật khẩu</label>
+            <input class="form-control" type="password" id="password" />
+        </div>
+        <div class="form-group">
+            <label asp-for="full_name" class="control-label">Họ tên</label>
+            <input asp-for="full_name" class="form-control" id="full_name" />
+            <span asp-validation-for="full_name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        @if (User.IsInRole(Role.ADMIN.ToString()))
+        {
+            <div class="form-group">
+                <label asp-for="roles" class="control-label">Role</label>
+                <ul class="check-box">
+                    @foreach (var item in Enum.GetValues(typeof(Role)))
+                    {
+
+                        @if ((Role)item == Role.ADMIN)
+                        {
+                            @if (User.IsInRole(Role.ADMIN.ToString()))
+                            {
+                                <li>
+                                    <input type="checkbox" name="role" value="@Enum.GetName(typeof(Role),item)">
+                                    @Enum.GetName(typeof(Role), item)
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li>
+                                <input type="checkbox" name="role" value="@Enum.GetName(typeof(Role),item)">
+                                @Enum.GetName(typeof(Role), item)
+                            </li>
+                        }
+
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <button class="btn-size btn btn-primary" onclick="onSubmit()"><i class="icon icon-add"></i>Thêm</button>
+        </div>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Quay lại danh sách</a>
+</div>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+}
+
+
+<script asp-append-version="true" src="~/js/user.js"></script>

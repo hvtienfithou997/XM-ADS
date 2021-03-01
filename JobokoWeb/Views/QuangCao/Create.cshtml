@@ -1,0 +1,168 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.QuangCao
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+
+
+<h4>Tạo quảng cáo</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="id_chien_dich" class="control-label">Chiến dịch</label>
+                <select id="id_chien_dich" class="form-control">
+                </select>
+                <span asp-validation-for="id_chien_dich" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ten_hien_thi" class="control-label"></label>
+                <input asp-for="ten_hien_thi" class="form-control" />
+                <span asp-validation-for="ten_hien_thi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="trang_thai" class="control-label"></label>
+                <select asp-for="trang_thai" class="form-control" asp-items="Html.GetEnumSelectList<TrangThaiQuangCao>()">
+                </select>
+                <span asp-validation-for="trang_thai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="link_dich" class="control-label"></label>
+                <input asp-for="link_dich" class="form-control" />
+                <span asp-validation-for="link_dich" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="loai_quang_cao" class="control-label"></label>
+                <select asp-for="loai_quang_cao" class="form-control" asp-items="@Html.GetEnumSelectList<LoaiQuangcao>()">
+                </select>
+                <span asp-validation-for="loai_quang_cao" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="link_hien_thi" class="control-label"></label>
+                <input asp-for="link_hien_thi" class="form-control" />
+                <span asp-validation-for="link_hien_thi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="tieu_de_1" class="control-label"></label>
+                <input asp-for="tieu_de_1" class="form-control" />
+                <span asp-validation-for="tieu_de_1" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="tieu_de_2" class="control-label"></label>
+                <input asp-for="tieu_de_2" class="form-control" />
+                <span asp-validation-for="tieu_de_2" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="mo_ta_1" class="control-label"></label>
+                <textarea asp-for="mo_ta_1" class="form-control"></textarea>
+                <span asp-validation-for="mo_ta_1" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="mo_ta_2" class="control-label"></label>
+                <textarea asp-for="mo_ta_2" class="form-control"></textarea>
+                <span asp-validation-for="mo_ta_2" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Lưu" id="btn_save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a id="back" asp-action="Index">Quay lại</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+
+        let id_chien_dich = '@ViewBag.id_chien_dich';
+
+        if (id_chien_dich !== "") {
+            $("#qc").attr("href", `/quangcao?id_chien_dich=${id_chien_dich}`);
+            $("#back").attr("href", `/quangcao?id_chien_dich=${id_chien_dich}`);
+
+            $.get(`${API_URL}/chiendich/get/${id_chien_dich}`,
+                function(res) {
+                    if (res.success) {
+                        $(".ten_chien_dich a").html(`<b>Chiến dịch: ${res.data.ten}</b>`);
+
+                    }
+                });
+        }
+
+
+        $.get(`${API_URL}/chiendich/getall?fields=id,ten`,
+            function(res) {
+                if (res.success) {
+                    let html_option = "";
+                    for (var i = 0; i < res.data.length; i++) {
+                        html_option += `<option value='${res.data[i].id}'>${res.data[i].ten}</option>`;
+                    }
+                    $("#id_chien_dich").html(html_option);
+                    if (id_chien_dich !== "") {
+                        $("#id_chien_dich").val('@ViewBag.id_chien_dich');
+                        $("#id_chien_dich").attr("disabled", 'disabled');
+                    }
+                }
+            });
+        $("#btn_save").click(function(e) {
+            e.preventDefault();
+            let obj = {
+                "ten_hien_thi": $("#ten_hien_thi").val(),
+                "id_chien_dich": $("#id_chien_dich > option:selected").val(),
+                "trang_thai": $("#trang_thai > option:selected").val(),
+                "link_dich": $("#link_dich").val(),
+                "loai_quang_cao": $("#loai_quang_cao").val(),
+                "link_hien_thi": $("#link_hien_thi").val(),
+                "tieu_de_1": $("#tieu_de_1").val(),
+                "tieu_de_2": $("#tieu_de_2").val(),
+                "mo_ta_1": $("#mo_ta_1").val(),
+                "mo_ta_2": $("#mo_ta_2").val()
+            };
+            $.ajax({
+                type: "POST",
+                contentType: 'application/json',
+                dataType: "json",
+                url: `${API_URL}/quangcao/add`,
+                data: JSON.stringify(obj),
+                success: function(res) {
+                    $("#div_loader").remove();
+                    if (res.success) {
+                        $.notify({
+                            title: "<strong>THÀNH CÔNG:</strong> ",
+                            message: "Thêm quảng cáo thành công"
+                        });
+                    } else {
+                        $.notify({
+                                title: "<strong>LỖI:</strong> ",
+                                message: res.msg
+                            },
+                            {
+                                type: 'danger'
+                            });
+                    }
+                },
+                failure: function(response) {
+                    $("#div_loader").remove();
+                    console.log(`Lỗi xảy ra ${response.error}`, "error");
+                },
+                error: function(request, textStatus, errorThrown) {
+                    $("#div_loader").remove();
+                    if (request.status == 401) {
+                        let token_exp = request.getResponseHeader('token-expired');
+                        if (token_exp != null && token_exp == 'true') {
+                            document.location.href = "/";
+                        }
+                        console.log(request.statusText);
+                    }
+                }
+            });
+        });
+    </script>
+}

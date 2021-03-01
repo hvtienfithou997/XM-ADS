@@ -1,0 +1,415 @@
+﻿@using JobokoAdsModels
+@model IEnumerable<JobokoAdsModels.ChienDich>
+@{
+    ViewData["Title"] = "Chiến dịch";
+}
+<h3>Danh sách chiến dịch</h3>
+<p>
+    <a asp-action="Create">Tạo chiến dịch</a>
+</p>
+<div id="chart"></div>
+<div class="row">
+    <div class="col-md-3">
+        <div class="form-group">
+        </div>
+    </div>
+    <div class="col-md-3">
+
+        <div class="form-group">
+            <input placeholder="Tìm kiếm chiến dịch" name="term" value="" class="form-control" />
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-control" id="trang_thai" name="trang_thai" asp-items="Html.GetEnumSelectList<TrangThaiChienDich>()">
+            <option selected="selected" value="-1">---Trạng thái chiến dịch---</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select class="form-control" id="field_sort" name="field_sort">
+            <option value="">Ngày sửa</option>
+            <option value="luot_hien_thi">Lượt hiển thị</option>
+            <option value="luot_click">Lượt click</option>
+            <option value="chi_phi">Chi phí</option>
+            <option value="ty_le_tuong_tac">Tỷ lệ tương tác</option>
+            <option value="cpc_trung_binh">CPC trung bình</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        <select class="form-control" id="sort_order" name="sort_order">
+            @*<option value="">Thứ tự</option>*@
+            <option value="1">Giảm</option>
+            <option value="0">Tăng</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        <button id="btn_search" class="btn btn-primary">Tìm</button>
+    </div>
+</div>
+<div class="total_recs"></div>
+<table class="table" id="table_data">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.ten)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ngan_sach)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.trang_thai)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ngay_bat_dau) / @Html.DisplayNameFor(model => model.ngay_ket_thuc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ngay_ket_thuc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.luot_hien_thi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.luot_click)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.chi_phi)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ty_le_tuong_tac)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.cpc_trung_binh)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <thead>
+        <tr>
+            <th>Tổng số:</th>
+            <th></th>
+            <th></th>
+            <th id="luot_hien_thi"></th>
+            <th id="luot_click"></th>
+            <th id="chi_phi"></th>
+            <th id="ty_le"></th>
+            <th id="cpc"></th>
+        </tr>
+    </thead>
+</table>
+
+<div style="text-align: center; width: 100%; display: inline-flex; justify-content: center">
+    <div class="d-flex text-center data-container">
+        <div class="paging">
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let term = '@ViewBag.term';
+        let trang_thai_cd = '@ViewBag.trang_thai';
+        let page = '@ViewBag.page';
+        let id_chien_dich = '@ViewBag.id_chien_dich';
+        let field_sort = '@ViewBag.field_sort';
+        let sort_order = '@ViewBag.sort_order';
+        $("#trang_thai").val(trang_thai_cd);
+        $("#sort_order").val(sort_order);
+        $("#field_sort").val(field_sort);
+        $("#btn_search").on("click",
+            function() {
+                page = 1;
+                trang_thai_cd = $("#trang_thai").val();
+                field_sort = $("#field_sort").val();
+                sort_order = $("#sort_order").val();
+                getChienDich(page);
+                resetSum();
+                getSum();
+
+            });
+
+        $(document).ready(function() {
+            getChienDich(page);
+            resetSum();
+            getSum();
+        });
+
+        function resetSum() {
+            $("#chi_phi").html(0);
+            $("#luot_hien_thi").html(0);
+            $("#luot_click").html(0);
+        }
+
+        function onChangeSwitch(id, me) {
+            let trang_thai = $(me).val();
+            callAPI(`${API_URL}/chiendich/updatetrangthai?id=${id}&trang_thai=${trang_thai}`,
+                null,
+                "PUT",
+                function(res) {
+                    if (res.success) {
+                        $.notify("Đổi trạng thái thành công", "success");
+                    } else {
+                        $.notify(`Lỗi xảy ra ${res.msg}`, "error");
+                    }
+                });
+        }
+
+        function getChienDich(page) {
+            let ngay_tao_to = 0, ngay_tao_from = 0, term = $("input[name='term']").val();
+
+            if (typeof term === 'undefined')
+                term = "";
+
+            if ($("#ngay_tao_from").val() !== "") {
+                ngay_tao_from = Math.floor(toDate($('#ngay_tao_from').val()).getTime() / 1000.0);
+            }
+            if ($("#ngay_tao_to").val() !== "") {
+                ngay_tao_to = Math.floor(toDate($('#ngay_tao_to').val()).getTime() / 1000.0);
+                ngay_tao_to = (ngay_tao_to + 86399);
+            }
+            let trang_thai = trang_thai_cd;
+            let field_sort_val = $("#field_sort").val();
+            if (typeof field_sort === 'undefined')
+                field_sort = "";
+            let sort_order_val = $("#sort_order").val();
+            let url = `term=${term}&trang_thai=${trang_thai}&id_chien_dich=${id_chien_dich}&field_sort=${field_sort}&sort_order=${sort_order}&page=${page}`;
+            window.history.pushState(window.location.href, "Danh sách chiến dịch", `?${url}`);
+
+            let tab_ung_vien = $('#table_data').DataTable({
+                destroy: true,
+                "ordering": false,
+                "autoWidth": false,
+                "dom": 'rt', /*https://datatables.net/reference/option/dom*/
+                searchPanes: {
+                    controls: false,
+                    orderable: false
+                },
+                "language": {
+                    "emptyTable": "Không tìm thấy chiến dịch"
+                },
+                ajax: function(data, callback) {
+
+                    let url =
+                        `${API_URL}/chiendich/all?term=${term}&ngay_tao_to=${ngay_tao_to}&ngay_tao_from=${ngay_tao_from
+                        }&trang_thai=${trang_thai}&id_chien_dich=${id_chien_dich}&field_sort=${field_sort_val}&sort_order=${sort_order_val}&page=${page}&page_size=${PAGE_SIZE}`;
+                    $.get(url,
+                        {
+                        },
+                        function(res) {
+                            $(".total_recs").html("Tổng: " + res.total);
+
+                            paging(res.total, 'getChienDich', page);
+                            callback({
+                                recordsTotal: res.total,
+                                recordsFiltered: res.total,
+                                data: res.data
+                            });
+                        }).fail(function() {
+                        $(".totalRecs").html("Tổng số chiến dịch: 0");
+
+                        callback({
+                            recordsTotal: 0,
+                            recordsFiltered: 0,
+                            data: []
+                        });
+                    });
+                },
+                columns: [
+                    { "data": "id", "name": "id", "searchable": false, "visible": false },
+                    {
+                        "data": "ten",
+                        "name": "Tên chiến dịch",
+                        "searchable": true,
+                        "width": "30%"
+                    },
+                    { "data": "ngan_sach", "name": "Ngân sách", "searchable": false, "width": "200px" },
+                    { "data": "trang_thai", "name": "Trạng thái", "searchable": false, "width": "150px" },
+                    { "data": `ngay_bat_dau`, "name": "Ngày bắt đầu ", "searchable": false, "width": "150px" },
+                    { "data": `ngay_ket_thuc`, "name": "Ngày kết thúc", "searchable": false, "width": "150px" },
+                    { "data": "luot_hien_thi", "name": "Hiển thị", "searchable": false, "width": "70px" },
+                    { "data": "luot_click", "name": "Lượt click", "searchable": false, "width": "70px" },
+                    { "data": "chi_phi", "name": "Chi phí", "searchable": false, "width": "150px" },
+                    { "data": "ty_le_tuong_tac", "name": "Tỷ lệ tương tác", "searchable": false, "width": "70px" },
+                    { "data": "cpc_trung_binh", "name": "CPC T/b", "searchable": false, "width": "70px" }
+                ],
+                "columnDefs": [
+                    {
+                        "render": function(data, type, row) {
+
+                            let html_tmp = "";
+
+                            if (row.trang_thai === 0) {
+                                html_tmp += `<select class="switch-option" id="switch" onchange="onChangeSwitch('${row.id}',this)"><option selected value="0">Bật</option><option value="1">Dừng</option></select>`;
+                            } else if (row.trang_thai === 1) {
+                                html_tmp += `<select class="switch-option" id="switch" onchange="onChangeSwitch('${row.id}',this)"><option value="0">Bật</option><option selected value="1">Dừng</option></select>`;
+                            } else if (row.trang_thai === 2) {
+                                html_tmp += `<select class="switch-option" id="switch" onchange="onChangeSwitch('${row.id}',this)"><option value="0">Bật</option><option value="1">Dừng</option><option selected value="2">Hết ngân sách</option></select>`;
+                            }
+                            
+                            
+                            html_tmp += `&nbsp<a href="/quangcao/?id_chien_dich=${row.id}"  title="xem quảng cáo">${row.ten}</a>&nbsp`;
+                            let img = `<img width="20px" src="/lib/edit.png" />`;
+                            html_tmp += `<a href="/chiendich/edit/${row.id}" title="Sửa">${img}</a>`;
+                            html_tmp += `<a href="/chiendich/editlocation/${row.id}" title="Sửa địa điểm"><img width="20px" src="/lib/edit-location.png" /></a>`;
+                            
+                            return html_tmp;
+                        },
+                        "targets": 1
+                    }, {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${formatCurency(row.ngan_sach)}`;
+                            return html_tmp;
+                        },
+                        "targets": 2
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = "";
+                            switch (row.trang_thai) {
+                            case 0:
+                                html_tmp = "BẬT";
+                                break;
+                            case 1:
+                                html_tmp = "TẠM DỪNG";
+                                break;
+                            case 2:
+                                html_tmp = "XÓA";
+                                break;
+                            }
+                            return html_tmp;
+                        },
+                        "targets": 3,
+                        "visible": false
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${epochToTime(row.ngay_bat_dau)} / `;
+                            html_tmp += `${epochToTime(row.ngay_ket_thuc)}`;
+                            return html_tmp;
+                        },
+                        "targets": 4
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${epochToTime(row.ngay_ket_thuc)}`;
+
+                            return html_tmp;
+                        },
+                        "targets": 5,
+                        "visible": false
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${formatCurency(row.chi_phi)} đ`;
+
+                            return html_tmp;
+                        },
+                        "targets": 8
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            let html_tmp = `${(row.ty_le_tuong_tac).toFixed(1)}%<br>${(row.diem_toi_uu * 100).toFixed(2)}%`;
+
+                            return html_tmp;
+                        },
+                        "targets": 9
+                    },
+                    {
+                        "render": function(data, type, row) {
+                            if (row.chi_phi > 0) {
+                                let html_tmp = `${formatCurency((row.chi_phi / row.luot_click).toFixed(0))} ₫`;
+                                return html_tmp;
+                            } else {
+                                return row.chi_phi;
+                            }
+                        },
+                        "targets": 10
+                    }
+                ],
+                pageLength: PAGE_SIZE,
+                responsive: true,
+                serverSide: true,
+                processing: true
+            });
+
+        }
+        google.charts.load('visualization', { packages: ['corechart'] });
+        google.charts.setOnLoadCallback(getSum);
+        function getSum() {
+            let term = $("input[name='term']").val();
+            if (typeof term === 'undefined')
+                term = "";
+            let trang_thai = trang_thai_cd;
+            $.ajax
+            ({
+                type: 'GET',
+                url: `${API_URL}/chiendich/getsum`,
+                dataType: 'json',
+                data: {
+                    term: term,
+                    trang_thai: trang_thai,
+                    id_chien_dich: id_chien_dich
+                },
+                success: function(res) {
+                    if (res.success) {
+                        $("#chi_phi").html(formatCurency(res.data.chi_phi) + " đ");
+                        $("#luot_hien_thi").html(res.data.luot_hien_thi);
+                        $("#luot_click").html(res.data.luot_click);
+                        $("#ty_le").html(res.data.ty_le.toFixed(1) + "%");
+                        $("#cpc").html(formatCurency(res.data.cpc) + "đ");
+
+                        try {
+                            var data = google.visualization.arrayToDataTable([
+                                ['Element', 'Số lượng', { role: 'style' }],
+                                ['Luợt click', res.data.luot_click, 'gold'],
+                                ['Lượt hiển thị', res.data.luot_hien_thi, 'color: #3366CC']
+                            ]);
+
+                            var options = {
+                                title: 'Thống kê lượt click và lượt hiển thị',
+                                chartArea: { width: '50%' },
+                                legend: { position: "none" },
+                                hAxis: {
+                                    minValue: 0,
+                                    textStyle: {
+                                        bold: true,
+                                        fontSize: 12,
+                                        color: '#4d4d4d'
+                                    },
+                                    titleTextStyle: {
+                                        bold: true,
+                                        fontSize: 18,
+                                        color: '#4d4d4d'
+                                    }
+                                },
+                                vAxis: {
+                                    title: 'Biểu đồ cột',
+                                    textStyle: {
+                                        fontSize: 14,
+                                        bold: true,
+                                        color: '#848484'
+                                    },
+                                    titleTextStyle: {
+                                        fontSize: 14,
+                                        bold: true,
+                                        color: '#848484'
+                                    }
+                                }
+                            };
+                            var chart = new google.visualization.BarChart(document.getElementById('chart'));
+                            chart.draw(data, options);
+                        } catch (e) {
+
+                        }
+
+                    }
+                },
+                error: function(ex) {
+                    alert("Message: " + ex);
+                }
+            });
+        }
+    </script>
+
+}

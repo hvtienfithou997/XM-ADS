@@ -1,0 +1,233 @@
+﻿@using JobokoAdsModels
+@model JobokoAdsModels.ChienDich
+
+@{
+    ViewData["Title"] = "Sửa chiến dịch";
+    string id = "";
+    if (ViewData["id"] != null)
+    {
+        id = Convert.ToString(ViewData["id"]);
+    }
+}
+<h3 class="ten"></h3>
+<h4>Sửa địa điểm xuất hiện chiến dịch</h4>
+
+<hr />
+<div class="row">
+    
+    
+    <div class="col-md-12">
+        <label class="control-label">Chọn quốc gia</label>
+        <select class="form-control" id="country" onchange="chooseCountry()">
+        </select>
+    </div>
+
+    <div class="col-md-12">
+
+        <label asp-for="dia_diem_muc_tieu" class="control-label"></label>
+        <select class="form-control" multiple size="10" id="dia_diem_muc_tieu" onchange="choose_ddmt()">
+        </select>
+    </div>
+
+    <div class="col-md-12">
+        <label asp-for="dia_diem_loai_tru" class="control-label"></label>
+        <select class="form-control" multiple size="10" id="dia_diem_loai_tru" onchange="choose_ddlt()">
+        </select>
+    </div>
+    <div class="col-md-12">
+        <label class="control-label">Địa điểm mục tiêu đã chọn</label>
+        <select class="form-control" multiple id="ddmt"></select>
+        <label class="control-label">Địa điểm loại trừ đã chọn</label>
+        <select class="form-control" multiple id="ddlt"></select>
+        <div class="form-group">
+            <br/>
+            <input type="submit" value="Lưu" id="btn_save" class="btn btn-primary"/>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Quay lại</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+
+
+        function chooseCountry() {
+            let country = $("#country").val();
+
+            $.get(`${API_URL}/chiendich/province`,
+                function (res) {
+                    if (res.success) {
+                        let html_dia_diem = "";
+                        res.data.forEach(function (item) {
+                            if (item.country === country) {
+                                item.provinces.forEach(function (dd) {
+                                    html_dia_diem += `<option value="${item.code}-${dd.name}">${item.code}-${dd.name
+                                        }</option>`;
+                                });
+                            }
+                        });
+
+                        $("#dia_diem_muc_tieu").html(html_dia_diem);
+                        $("#dia_diem_muc_tieu").select2();
+
+                        $("#dia_diem_loai_tru").html(html_dia_diem);
+                        $("#dia_diem_loai_tru").select2();
+
+                        //$("#dia_diem_muc_tieu").val(["Toàn quốc"]);
+                        //$("#dia_diem_muc_tieu").select2(["Toàn quốc"]);
+                    }
+                });
+
+            let dia_diem_da_chon = $("#ddmt").val();
+            $("#ddmt").val(dia_diem_da_chon);
+            $("#ddmt").select2(dia_diem_da_chon);
+
+            let dia_diem_loai_tru = $("#ddlt").val();
+            $("#ddlt").val(dia_diem_loai_tru);
+            $("#ddlt").select2(dia_diem_loai_tru);
+
+        }
+
+
+        function choose_ddmt() {
+            let dia_diem_da_chon = $("#ddmt").val();
+
+            let dd = $("#dia_diem_muc_tieu").val();
+            var mer = dd.concat(dia_diem_da_chon);
+            arr_dia_diem = dd;
+            let html = "";
+            mer.forEach(function (item) {
+                html += `<option value=${item}>${item}</option>`;
+            });
+            $("#ddmt").val(mer);
+            $("#ddmt").select2(mer);
+
+        }
+
+        function choose_ddlt() {
+            let dia_diem_loai_tru = $("#ddlt").val();
+
+            let dd = $("#dia_diem_loai_tru").val();
+            var mer = dd.concat(dia_diem_loai_tru);
+            arr_dia_diem = dd;
+            let html = "";
+            mer.forEach(function (item) {
+                html += `<option value=${item}>${item}</option>`;
+            });
+            $("#ddlt").val(mer);
+            $("#ddlt").select2(mer);
+        }
+
+
+        $.get(`${API_URL}/chiendich/province`,
+            function (res) {
+                if (res.success) {
+                    let html = "";
+                    let html_dia_diem = "";
+                    res.data.forEach(function (item) {
+                        html += `<option value='${item.country}'>${item.country}</option>`;
+                        item.provinces.forEach(function (dd) {
+                            html_dia_diem += `<option value="${item.code}-${dd.name}">${item.code}-${dd.name}</option>`;
+                        });
+                    });
+
+                    $("#country").html(html);
+                    $("#country").select2();
+
+                    $("#dia_diem_muc_tieu").html(html_dia_diem);
+                    $("#dia_diem_muc_tieu").select2();
+
+                    $("#dia_diem_loai_tru").html(html_dia_diem);
+                    $("#dia_diem_loai_tru").select2();
+
+                    $("#ddmt").html(html_dia_diem);
+                    $("#ddmt").select2();
+
+                    $("#ddlt").html(html_dia_diem);
+                    $("#ddlt").select2();
+                }
+            });
+
+        $.get(`${API_URL}/chiendich/get/@id`,
+            function(res) {
+                if (res.success) {
+                    let chien_dich = res.data;
+
+                    $(".ten").html("Chiến dịch: " + res.data.ten);
+
+                    $("#dia_diem_muc_tieu").select2(chien_dich.dia_diem_muc_tieu);
+
+                    //for (var i = 0; i < chien_dich.dia_diem_muc_tieu.length; i++) {
+                    //    $(`#dia_diem_muc_tieu option[value="${chien_dich.dia_diem_muc_tieu[i]}"]`)
+                    //        .prop("selected", true);
+                    //    $("#dia_diem_muc_tieu").select2(chien_dich.dia_diem_muc_tieu);
+                    //}
+                    //for (var o = 0; o < chien_dich.dia_diem_loai_tru.length; o++) {
+                    //    $(`#dia_diem_loai_tru option[value="${chien_dich.dia_diem_loai_tru[o]}"]`)
+                    //        .prop("selected", true);
+                    //    $("#dia_diem_loai_tru").select2(chien_dich.dia_diem_muc_tieu);
+                    //}
+                    
+                    for (var i = 0; i < chien_dich.dia_diem_muc_tieu.length; i++) {
+                        $(`#ddmt option[value="${chien_dich.dia_diem_muc_tieu[i]}"]`)
+                            .prop("selected", true);
+                        $("#ddmt").select2(chien_dich.dia_diem_muc_tieu);
+                    }
+                    for (var o = 0; o < chien_dich.dia_diem_loai_tru.length; o++) {
+                        $(`#ddlt option[value="${chien_dich.dia_diem_loai_tru[o]}"]`)
+                            .prop("selected", true);
+                        $("#ddlt").select2(chien_dich.dia_diem_muc_tieu);
+                    }
+
+                }
+            });
+
+        $("#btn_save").click(function(e) {
+            e.preventDefault();
+            let dia_diem_mt = [], dia_diem_lt = [];
+
+            $('#ddmt option:selected').each(function() {
+                dia_diem_mt.push($(this).val());
+            });
+            $('#ddlt option:selected').each(function() {
+                dia_diem_lt.push($(this).val());
+            });
+            let obj = {
+                "dia_diem_muc_tieu": dia_diem_mt,
+                "dia_diem_loai_tru": dia_diem_lt
+            };
+            $.ajax({
+                type: "PUT",
+                contentType: 'application/json',
+                dataType: "json",
+                url: `${API_URL}/chiendich/updatediadiem/@id`,
+                data: JSON.stringify(obj),
+                success: function(res) {
+                    $("#div_loader").remove();
+                    $.notify({
+                        title: "<strong>THÀNH CÔNG:</strong> ",
+                        message: "Sửa địa điểm thành công"
+                    });
+                },
+                failure: function(response) {
+                    $("#div_loader").remove();
+                    console.log(`Lỗi xảy ra ${response.error}`, "error");
+                },
+                error: function(request, textStatus, errorThrown) {
+                    $("#div_loader").remove();
+                    if (request.status == 401) {
+                        let token_exp = request.getResponseHeader('token-expired');
+                        if (token_exp != null && token_exp === 'true') {
+                            document.location.href = "/";
+                        }
+                        console.log(request.statusText);
+                    }
+                }
+            });
+        });
+    </script>
+}
